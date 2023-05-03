@@ -1,24 +1,10 @@
-import { ChatInputCommandInteraction, Collection, REST, Routes } from 'discord.js'
+import { Collection, REST, Routes } from 'discord.js'
 import fs from 'node:fs'
 import path from 'node:path'
 
 import { client } from './config/client'
 import { APP_ID, BOT_TOKEN } from './config/envs'
-
-type Command = {
-  data: {
-    options: []
-    name: string
-    name_localizations: undefined
-    description: string
-    description_localizations: string | undefined
-    default_permission: any
-    default_member_permissions: any
-    dm_permission: any
-    nsfw: any
-  }
-  execute: (i: ChatInputCommandInteraction) => any
-}
+import { Command } from './types/commands'
 
 const commands: Command[] = []
 
