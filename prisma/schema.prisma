@@ -13,9 +13,9 @@ model Nade {
   name        String @db.Text
   description String @db.Text
   map_id      String
-  video_url   String
   status      Status @default(PENDING)
   author_id   String
+  video_url   String
   map         Map    @relation(fields: [map_id], references: [name])
   author      User   @relation(fields: [author_id], references: [discord_tag])
 
@@ -24,9 +24,8 @@ model Nade {
 }
 
 model Map {
-  name        String @id
-  description String
-  nades       Nade[]
+  name  String @id
+  nades Nade[]
 }
 
 model User {
