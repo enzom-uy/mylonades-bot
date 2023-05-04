@@ -10,12 +10,12 @@ datasource db {
 
 model Nade {
   id          String @id @default(uuid())
-  name        String @db.Text
   description String @db.Text
   map_id      String
   status      Status @default(PENDING)
   author_id   String
   video_url   String
+  title       String @db.Text
   map         Map    @relation(fields: [map_id], references: [name])
   author      User   @relation(fields: [author_id], references: [discord_tag])
 
