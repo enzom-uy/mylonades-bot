@@ -8,9 +8,11 @@ const data = {
   client_secret: GFYCAT_SECRET,
   grant_type: 'client_credentials'
 }
+
+const URL = 'https://api.gfycat.com/v1/oauth/token'
 export const requestBearerTokenResponse = async (): Promise<void | AxiosGfycatRequestToken> => {
   const response = await axios
-    .post('https://api.gfycat.com/v1/oauth/token', data)
+    .post(URL, data)
     .then(res => res.data as AxiosGfycatRequestToken)
     .catch((err: AxiosError) => {
       if (err.response) {
@@ -20,5 +22,6 @@ export const requestBearerTokenResponse = async (): Promise<void | AxiosGfycatRe
         console.log('Error Message:', err.message)
       }
     })
+  console.log(response)
   return response
 }
