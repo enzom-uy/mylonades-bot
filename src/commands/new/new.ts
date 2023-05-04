@@ -1,4 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
+import fetch from 'node-fetch'
+import fs, { rmdir } from 'node:fs'
+import path from 'node:path'
 
 interface StringOptions {
   title: string
@@ -36,6 +39,20 @@ stringOptions.forEach(option => {
 })
 
 export const execute = async (i: ChatInputCommandInteraction): Promise<void> => {
+  const path = 'videos'
   const attachment = i.options.getAttachment('video')
-  await i.reply(attachment ? attachment.url : 'Something went wrong.')
+  if (attachment) {
+    if (!fs.existsSync(path)) {
+      fs.mkdirSync(path)
+    }
+    const savedAtch = await fetch(attachment.url).then(res =>
+      res.body?.pipe(fs.createWriteStream(`./videos/${attachment.name}`))
+    )
+    console.log(savedAtch)
+
+    await i.reply(attachment ? attachment.url : 'Something went wrong.')
+
+    fs.rmSync(`${path}/${attachment.name}`)
+    fs.rmdirSync(path)
+  }
 }
