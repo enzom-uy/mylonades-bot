@@ -11,7 +11,6 @@ const getExpirationDate = (expiresInSeconds: bigint): string => {
 const generateAndStoreBearerToken = async (): Promise<void> => {
   const bearerAlreadyExists = await prisma.accessToken.findMany()
 
-  // TODO: Check for expiration date and refresh it if needed.
   if (bearerAlreadyExists.length > 1) {
     log('WARNING', 'There was more than 1 access token. Deleting all of them.')
     await prisma.accessToken.deleteMany()
@@ -62,7 +61,7 @@ const generateAndStoreBearerToken = async (): Promise<void> => {
   if (!uploadedToken)
     return log('ERROR', 'An error ocurred while trying to upload the Bearer Token to the database.')
 
-  log('INFO', 'A Bearer Token was uploaded to the database:', uploadedToken)
+  return log('INFO', 'A Bearer Token was uploaded to the database:', uploadedToken)
 }
 
 generateAndStoreBearerToken()
