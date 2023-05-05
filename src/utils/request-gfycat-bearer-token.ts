@@ -10,10 +10,14 @@ const data = {
 }
 
 const URL = 'https://api.gfycat.com/v1/oauth/token'
-export const requestBearerTokenResponse = async (): Promise<void | AxiosGfycatRequestToken> => {
+export const requestBearerToken = async (): Promise<void | AxiosGfycatRequestToken> => {
+  console.log('Requesting Bearer Token to Gfycat API...')
   const response = await axios
     .post(URL, data)
-    .then(res => res.data as AxiosGfycatRequestToken)
+    .then(res => {
+      console.log('Bearer Token requested succesfully.')
+      return res.data as AxiosGfycatRequestToken
+    })
     .catch((err: AxiosError) => {
       if (err.response) {
         console.log('Error data:', err.response)
@@ -22,6 +26,5 @@ export const requestBearerTokenResponse = async (): Promise<void | AxiosGfycatRe
         console.log('Error Message:', err.message)
       }
     })
-  console.log(response)
   return response
 }
