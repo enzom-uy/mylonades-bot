@@ -41,22 +41,23 @@ stringOptions.forEach(option => {
 })
 
 export const execute = async (i: ChatInputCommandInteraction): Promise<void> => {
-  const path = 'videos'
+  /* const path = 'videos' */
   const attachment = i.options.getAttachment('video')
   if (attachment) {
     // Create a directory using node:fs to store the downloaded attachment using node-fetch,
     // so I can upload it to Gfycat, get the gfycat video url and delete the dir with the file after.
-    if (!fs.existsSync(path)) {
-      fs.mkdirSync(path)
-    }
-    await fetch(attachment.url).then(res =>
-      res.body?.pipe(fs.createWriteStream(`./videos/${attachment.name}`))
-    )
-    const videoUploadResponse = await uploadToGfycat(attachment.proxyURL)
-    log('LOG', videoUploadResponse)
-    await i.reply(attachment ? attachment.url : 'Something went wrong.')
+    /* if (!fs.existsSync(path)) { */
+    /*   fs.mkdirSync(path) */
+    /* } */
+    /* await fetch(attachment.url).then(res => */
+    /*   res.body?.pipe(fs.createWriteStream(`./videos/${attachment.name}`)) */
+    /* ) */
+    log('LOG', attachment)
+    await uploadToGfycat(attachment.url)
+    return
 
-    fs.rmSync(`${path}/${attachment.name}`)
-    fs.rmdirSync(path)
+    /* fs.rmSync(`${path}/${attachment.name}`) */
+    /* fs.rmdirSync(path) */
   }
+  await i.reply(attachment ? attachment : 'Something went wrong.')
 }
