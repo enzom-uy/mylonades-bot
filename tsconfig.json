@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    /* Language and Environment */
     "target": "es2022",
     "module": "CommonJS",
     "esModuleInterop": true,
@@ -8,6 +7,10 @@
     "strict": true,
     "noImplicitAny": true,
     "skipLibCheck": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": ["src/*"]
+    }
   }
 }
