@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 
-export type MessageTypes = 'ERROR' | 'INFO' | 'LOG' | 'WARNING'
+export type MessageTypes = 'ERROR' | 'INFO' | 'LOG' | 'WARNING' | 'SUCCESS'
 
 export const chalkInfo = (text?: string): string => {
   return chalk.bgBlue(`  ${text ? text : 'INFO'}  `)
@@ -13,8 +13,10 @@ export const chalkHt = (type: MessageTypes, text?: string): string => {
     case 'INFO':
       return chalk.bgCyan(`  ${text ? text : 'INFO'}  `)
     case 'LOG':
-      return chalk.bgGreen(`  ${text ? text : 'LOG'}  `)
+      return chalk.bgWhite(`  ${text ? text : 'LOG'}  `)
     case 'WARNING':
       return chalk.bgYellow(`  ${text ? text : 'WARNING'}  `)
+    case 'SUCCESS':
+      return chalk.bgGreen(`  ${text ? text : 'SUCCESS'}  `)
   }
 }

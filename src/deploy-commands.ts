@@ -5,6 +5,7 @@ import path from 'node:path'
 import { client } from './config/client'
 import { APP_ID, BOT_TOKEN } from './config/envs'
 import { Command } from './types/commands'
+import { log } from './utils/log'
 
 const commands: Command[] = []
 
@@ -24,8 +25,9 @@ for (const folder of commandsFolder) {
       commands.push(command.data.toJSON())
       client.commands.set(command.data.name, command)
     } else {
-      console.log(
-        `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
+      log(
+        'WARNING',
+        `The command at ${filePath} is missing a required "data" or "execute" property.`
       )
     }
   }
@@ -35,16 +37,16 @@ const rest = new REST().setToken(BOT_TOKEN)
 
 ;(async () => {
   try {
-    console.log(`Started refreshing ${commands.length} application (/) commands.`)
+    log('INFO', `Started refreshing ${commands.length} application (/) commands.`)
 
     // The put method is used to fully refresh all commands in the guild with the current set
     const data: any = await rest.put(Routes.applicationCommands(APP_ID), {
       body: commands
     })
 
-    console.log(`Successfully reloaded ${data.length} application (/) commands.`)
+    log('SUCCESS', `Successfully reloaded ${data.length} application (/) commands.`)
   } catch (error) {
     // And of course, make sure you catch and log any errors!
-    console.error(error)
+    log('ERROR', error)
   }
 })()

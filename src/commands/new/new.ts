@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import fetch from 'node-fetch'
 import fs from 'node:fs'
 
+import { log } from '../../utils/log'
 import { uploadToGfycat } from '../../utils/uploadToGfycat'
 
 interface StringOptions {
@@ -51,8 +52,8 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
     await fetch(attachment.url).then(res =>
       res.body?.pipe(fs.createWriteStream(`./videos/${attachment.name}`))
     )
-    await uploadToGfycat(attachment.proxyURL)
-
+    const videoUploadResponse = await uploadToGfycat(attachment.proxyURL)
+    log('LOG', videoUploadResponse)
     await i.reply(attachment ? attachment.url : 'Something went wrong.')
 
     fs.rmSync(`${path}/${attachment.name}`)

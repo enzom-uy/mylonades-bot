@@ -4,11 +4,12 @@ import { client } from './config/client'
 import { BOT_TOKEN } from './config/envs'
 import './deploy-commands'
 import './config/gfycat'
+import { log } from './utils/log'
 
 client.login(BOT_TOKEN)
 
 client.once(Events.ClientReady, c => {
-  console.log(`Ready! Logged in as ${c.user.tag}.`)
+  log('SUCCESS', `Ready! Logged in as ${c.user.tag}.`)
 })
 
 client.on(Events.InteractionCreate, async i => {
@@ -17,13 +18,13 @@ client.on(Events.InteractionCreate, async i => {
   const command = i.client.commands.get(i.commandName)
 
   if (!command) {
-    return console.error(`No command mathing ${i.commandName} was found.`)
+    return log('ERROR', `No command mathing ${i.commandName} was found.`)
   }
 
   try {
     await command.execute(i)
   } catch (error) {
-    console.error(error)
+    log('ERROR', error)
     if (i.replied || i.deferred) {
       await i.followUp({
         content: 'There was an error while executing this command!',

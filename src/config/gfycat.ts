@@ -1,5 +1,4 @@
 import { prisma } from './database'
-import { chalkHt } from '../utils/chalk'
 import { log } from '../utils/log'
 import { requestBearerToken } from '../utils/request-gfycat-bearer-token'
 
@@ -19,7 +18,7 @@ const generateAndStoreBearerToken = async (): Promise<void> => {
     return
   }
   if (bearerAlreadyExists.length === 1) {
-    console.info(chalkHt('INFO'), 'A Bearer Token already exists. Skipping it creation.')
+    log('INFO', 'A Bearer Token already exists. Skipping it creation.')
     log('LOG', 'Checking expiration date...')
 
     const expirationDate = bearerAlreadyExists.map(token => new Date(Number(token.expiration)))[0]
@@ -43,7 +42,7 @@ const generateAndStoreBearerToken = async (): Promise<void> => {
 
   const bearerTokenResponse = await requestBearerToken()
   if (!bearerTokenResponse)
-    return console.error('Something went wrong while trying to request a Bearer Token from Gfycat.')
+    return log('ERROR', 'Something went wrong while trying to request a Bearer Token from Gfycat.')
 
   const uploadedToken = await prisma.accessToken.create({
     data: {
