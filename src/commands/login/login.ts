@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 
 import { prisma } from '../../config/database'
+import { log } from '../../utils/log'
 
 export const data = new SlashCommandBuilder()
   .setName('login')
@@ -16,7 +17,11 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
       }
     })
 
-    if (userAlreadyExists) return
+    log('LOG', userAlreadyExists)
+    if (userAlreadyExists) {
+      await i.reply('You are already logged in.')
+      return
+    }
 
     const userCreated = await prisma.user.create({
       data: {
