@@ -36,10 +36,10 @@ model User {
 }
 
 model AccessToken {
-  id           String   @id @default(cuid())
+  id           String  @id @default(cuid())
   token        String
   refreshToken String?
-  expiration   DateTime
+  expiration   BigInt
 }
 
 enum Status {
