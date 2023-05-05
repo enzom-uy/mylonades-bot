@@ -27,19 +27,27 @@ const generateAndStoreBearerToken = async (): Promise<void> => {
     log('LOG', 'Expiration date:', expirationDate)
 
     if (currentDate > expirationDate) {
-      log('INFO', 'The Bearer Token has expired. Requesting a refresh token...')
+      log(
+        'WARNING',
+        'The Bearer Token has expired. Deleting it and requesting a new Bearer Token...'
+      )
+      const deletedToken = await prisma.accessToken.deleteMany({
+        where: {
+          token: bearerAlreadyExists[0].token
+        }
+      })
+      if (!deletedToken) {
+        return log('ERROR', 'Something went wrong while trying to delete the expired token.')
+      }
+      log('SUCCESS', 'Deleted expired token.')
     } else {
       log('INFO', 'The Bearer Token is still valid.')
       return
     }
-
-    log(
-      'LOG',
-      bearerAlreadyExists.map(token => token)
-    )
     return
   }
 
+  log('INFO', 'Requesting a new Bearer Token...')
   const bearerTokenResponse = await requestBearerToken()
   if (!bearerTokenResponse)
     return log('ERROR', 'Something went wrong while trying to request a Bearer Token from Gfycat.')
