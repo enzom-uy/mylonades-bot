@@ -13,7 +13,7 @@ export const chalkHt = (type: MessageTypes, text?: string): string => {
     case 'INFO':
       return chalk.bgCyan(`  ${text ? text : 'INFO'}  `)
     case 'LOG':
-      return chalk.bgWhite(`  ${text ? text : 'LOG'}  `)
+      return chalk.bgMagenta(`  ${text ? text : 'LOG'}  `)
     case 'WARNING':
       return chalk.bgYellow(`  ${text ? text : 'WARNING'}  `)
     case 'SUCCESS':
