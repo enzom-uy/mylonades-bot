@@ -12,7 +12,7 @@ export const log = (level: MessageTypes, ...params: any): void => {
       console.warn(chalkHt('WARNING'), ...params)
       break
     case 'SUCCESS':
-      console.warn(chalkHt('WARNING'), ...params)
+      console.warn(chalkHt('SUCCESS'), ...params)
       break
     default:
       console.log(chalkHt('LOG'), ...params)
