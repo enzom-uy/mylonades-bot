@@ -13,15 +13,12 @@
     "@prisma/client": "4.13.0",
     "axios": "^1.4.0",
     "discord.js": "^14.9.0",
-    "dotenv": "^16.0.3",
-    "fs": "^0.0.1-security",
-    "node-fetch": "2"
+    "dotenv": "^16.0.3"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "@types/chalk": "^2.2.0",
     "@types/node": "^18.16.3",
-    "@types/node-fetch": "2",
     "@typescript-eslint/eslint-plugin": "^5.59.0",
     "@typescript-eslint/parser": "^5.59.0",
     "chalk": "4.1.2",
