@@ -2,11 +2,14 @@ import { Collection, REST, Routes } from 'discord.js'
 import fs from 'node:fs'
 import path from 'node:path'
 
+import { loadMapsFromDb } from './config/cache'
 import { client } from './config/client'
 import { APP_ID, BOT_TOKEN } from './config/envs'
 import { Command } from './types/commands'
 import { log } from './utils/log'
-
+;(async () => {
+  await loadMapsFromDb()
+})()
 const commands: Command[] = []
 
 client.commands = new Collection()

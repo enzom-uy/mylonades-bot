@@ -1,10 +1,16 @@
 import axios from 'axios'
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
+import {
+  AutocompleteInteraction,
+  ChatInputCommandInteraction,
+  SlashCommandBuilder
+} from 'discord.js'
 
+import { maps } from '../../config/cache'
 import { validateInputs } from '../../schemas/commands/new'
 import { GetGfyInfoResponse, StringOptions } from '../../types/commands/new'
 import { formatGfycatUrl } from '../../utils/gfycat'
 import { log } from '../../utils/log'
+import { prisma } from '../../config/database'
 
 const stringOptions: StringOptions[] = [
   {
@@ -24,7 +30,6 @@ const stringOptions: StringOptions[] = [
     required: true
   }
 ]
-
 const compareRequired = (a: StringOptions, b: StringOptions): 1 | -1 | 0 => {
   if (a.required && !b.required) {
     return -1
@@ -36,13 +41,22 @@ const compareRequired = (a: StringOptions, b: StringOptions): 1 | -1 | 0 => {
 }
 
 const optionsRequiredFirst = stringOptions.sort(compareRequired)
-
 export const data = new SlashCommandBuilder().setName('new').setDescription('Upload a new nade.')
+data.addStringOption(o =>
+  o.setName('map').setDescription('Nombre del mapa.').setAutocomplete(true).setRequired(true)
+)
 optionsRequiredFirst.forEach(option => {
   data.addStringOption(opt =>
     opt.setName(option.title).setDescription(option.description).setRequired(option.required)
   )
 })
+
+export const autocomplete = async (i: AutocompleteInteraction): Promise<void> => {
+  const focused = i.options.getFocused()
+  const choices = maps.map(map => map.name)
+  const filtered = choices.filter(choice => choice.toLowerCase().startsWith(focused.toLowerCase()))
+  await i.respond(filtered.map(choice => ({ name: choice, value: choice })))
+}
 
 export const execute = async (i: ChatInputCommandInteraction): Promise<void> => {
   await i.deferReply()
@@ -67,10 +81,32 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
       .then(res => res.data)
       .catch(e => log('ERROR', e))
     log('SUCCESS', axiosResponse.gfyItem)
-    await i.editReply({
-      content: `Se ha subido una nueva nade a Mylo Nades:`,
-      files: [axiosResponse.gfyItem.mp4Url]
+    const newNade = await prisma.nade.create({
+      data: {
+        title: i.options.getString('título') as string,
+        description: descripcion ? descripcion : null,
+        status: 'PENDING',
+        author: {
+          connect: {
+            discord_tag: i.user.tag
+          }
+        },
+        video_url: axiosResponse.gfyItem.mp4Url,
+        map: {
+          connect: {
+            name: 'Mirage'
+          }
+        }
+      }
     })
+    if (newNade) {
+      await i.editReply({
+        content: `Se ha subido una nueva nade a Mylo Nades:`,
+        files: [axiosResponse.gfyItem.mp4Url]
+      })
+    } else {
+      await i.editReply('Ha ocurrido un error al intentar subir la granada. Inténtalo de nuevo.')
+    }
   }
   return
 }
