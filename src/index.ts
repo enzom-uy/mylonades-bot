@@ -3,7 +3,6 @@ import { Events } from 'discord.js'
 import { client } from './config/client'
 import { BOT_TOKEN } from './config/envs'
 import './deploy-commands'
-import './config/gfycat'
 import { log } from './utils/log'
 
 client.login(BOT_TOKEN)
