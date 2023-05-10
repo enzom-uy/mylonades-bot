@@ -7,13 +7,17 @@ interface Args {
   title: string
   description?: string | null
   userDiscordTag: string
+  map: string
+  nadeType: string
 }
 
 export const prismaCreateNade = async ({
   description,
   videoUrl,
   userDiscordTag,
-  title
+  title,
+  map,
+  nadeType
 }: Args): Promise<Nade> => {
   const newNade = await prisma.nade.create({
     data: {
@@ -28,7 +32,12 @@ export const prismaCreateNade = async ({
       video_url: videoUrl,
       map: {
         connect: {
-          name: 'Mirage'
+          name: map
+        }
+      },
+      nadeType: {
+        connect: {
+          name: nadeType
         }
       }
     }
