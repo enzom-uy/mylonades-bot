@@ -35,13 +35,6 @@ model User {
   nades       Nade[]
 }
 
-model AccessToken {
-  id           String  @id @default(cuid())
-  token        String
-  refreshToken String?
-  expiration   BigInt
-}
-
 enum Status {
   APPROVED
   PENDING
