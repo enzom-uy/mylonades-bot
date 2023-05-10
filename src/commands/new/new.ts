@@ -1,10 +1,12 @@
 import axios from 'axios'
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 
+import { validateInputs } from '../../schemas/commands/new'
+import { GetGfyInfoResponse } from '../../types/commands/new'
 import { formatGfycatUrl } from '../../utils/gfycat'
 import { log } from '../../utils/log'
 
-interface StringOptions {
+export interface StringOptions {
   title: string
   description: string
   required: boolean
@@ -55,11 +57,26 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
   const gfycatUrl = i.options.getString('gfycat_url') as string
   const gfycatUrlId = formatGfycatUrl(gfycatUrl)
 
-  const axiosResponse = await axios
-    .get(`https://api.gfycat.com/v1/gfycats/${gfycatUrlId}`)
-    .then(res => res.data)
-    .catch(e => log('ERROR', e))
-  log('LOG', axiosResponse)
+  const { success, errorMessage } = validateInputs({
+    título: titulo as string,
+    descripción: descripcion,
+    gfycat_url: gfycatUrl
+  })
 
-  await i.editReply(`${titulo}, ${descripcion}, ${gfycatUrl}`)
+  if (success === false && errorMessage && errorMessage.length > 0) {
+    await i.editReply(String(errorMessage))
+    return
+  }
+  if (success) {
+    const axiosResponse: GetGfyInfoResponse = await axios
+      .get(`https://api.gfycat.com/v1/gfycats/${gfycatUrlId}`)
+      .then(res => res.data)
+      .catch(e => log('ERROR', e))
+    log('SUCCESS', axiosResponse.gfyItem)
+    await i.editReply({
+      content: `Se ha subido una nueva nade a Mylo Nades:`,
+      files: [axiosResponse.gfyItem.mp4Url]
+    })
+  }
+  return
 }
