@@ -7,10 +7,6 @@
     "strict": true,
     "noImplicitAny": true,
     "skipLibCheck": true,
-    "outDir": "./dist",
-    "baseUrl": ".",
-    "paths": {
-      "@src/*": ["src/*"]
-    }
+    "outDir": "./dist"
   }
 }
