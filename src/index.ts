@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Events } from 'discord.js'
+import { Events } from 'discord.js'
 
 import { client } from './config/client'
 import { BOT_TOKEN } from './config/envs'
