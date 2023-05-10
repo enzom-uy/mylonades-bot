@@ -1,16 +1,17 @@
-import axios from 'axios'
 import {
   AutocompleteInteraction,
   ChatInputCommandInteraction,
   SlashCommandBuilder
 } from 'discord.js'
 
-import { maps } from '../../config/cache'
+import { myCache } from '../../config/cache'
 import { validateInputs } from '../../schemas/commands/new'
-import { GetGfyInfoResponse, StringOptions } from '../../types/commands/new'
+import { MapsFromCache } from '../../types/commands'
+import { StringOptions } from '../../types/commands/new'
+import { getGfycat } from '../../utils/axios/get-gfycat'
+import { compareRequired } from '../../utils/commands/sort-required-first'
 import { formatGfycatUrl } from '../../utils/gfycat'
-import { log } from '../../utils/log'
-import { prisma } from '../../config/database'
+import { prismaCreateNade } from '../../utils/prisma/create'
 
 const stringOptions: StringOptions[] = [
   {
@@ -30,15 +31,6 @@ const stringOptions: StringOptions[] = [
     required: true
   }
 ]
-const compareRequired = (a: StringOptions, b: StringOptions): 1 | -1 | 0 => {
-  if (a.required && !b.required) {
-    return -1
-  } else if (!a.required && b.required) {
-    return 1
-  } else {
-    return 0
-  }
-}
 
 const optionsRequiredFirst = stringOptions.sort(compareRequired)
 export const data = new SlashCommandBuilder().setName('new').setDescription('Upload a new nade.')
@@ -53,21 +45,22 @@ optionsRequiredFirst.forEach(option => {
 
 export const autocomplete = async (i: AutocompleteInteraction): Promise<void> => {
   const focused = i.options.getFocused()
-  const choices = maps.map(map => map.name)
+  const mapsFromCache = myCache.get('maps') as MapsFromCache[]
+  const choices = mapsFromCache.map(map => map.name)
   const filtered = choices.filter(choice => choice.toLowerCase().startsWith(focused.toLowerCase()))
   await i.respond(filtered.map(choice => ({ name: choice, value: choice })))
 }
 
 export const execute = async (i: ChatInputCommandInteraction): Promise<void> => {
   await i.deferReply()
-  const titulo = i.options.getString('título')
-  const descripcion = i.options.getString('descripción')
+  const title = i.options.getString('título')
+  const description = i.options.getString('descripción')
   const gfycatUrl = i.options.getString('gfycat_url') as string
   const gfycatUrlId = formatGfycatUrl(gfycatUrl)
 
   const { success, errorMessage } = validateInputs({
-    título: titulo as string,
-    descripción: descripcion,
+    título: title as string,
+    descripción: description,
     gfycat_url: gfycatUrl
   })
 
@@ -76,28 +69,12 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
     return
   }
   if (success) {
-    const axiosResponse: GetGfyInfoResponse = await axios
-      .get(`https://api.gfycat.com/v1/gfycats/${gfycatUrlId}`)
-      .then(res => res.data)
-      .catch(e => log('ERROR', e))
-    log('SUCCESS', axiosResponse.gfyItem)
-    const newNade = await prisma.nade.create({
-      data: {
-        title: i.options.getString('título') as string,
-        description: descripcion ? descripcion : null,
-        status: 'PENDING',
-        author: {
-          connect: {
-            discord_tag: i.user.tag
-          }
-        },
-        video_url: axiosResponse.gfyItem.mp4Url,
-        map: {
-          connect: {
-            name: 'Mirage'
-          }
-        }
-      }
+    const axiosResponse = await getGfycat(gfycatUrlId)
+    const newNade = await prismaCreateNade({
+      userDiscordTag: i.user.tag,
+      description: description && description,
+      title: title as string,
+      videoUrl: axiosResponse.gfyItem.mp4Url
     })
     if (newNade) {
       await i.editReply({

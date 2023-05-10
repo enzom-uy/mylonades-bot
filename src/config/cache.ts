@@ -4,14 +4,14 @@ import { prisma } from './database'
 import { log } from '../utils/log'
 
 export const myCache = new NodeCache()
-
-let maps: { name: string; value: string }[] = []
-
 export const loadMapsFromDb = async (): Promise<void> => {
   const mapsFromDb = await prisma.map.findMany()
-  log('LOG', maps)
   if (mapsFromDb.length > 0) {
-    mapsFromDb.map(map => maps.push({ name: map.name, value: map.name }))
+    myCache.set(
+      'maps',
+      mapsFromDb.map(map => ({ name: map.name, value: map.name }))
+    )
+    log('LOG', myCache.get('maps'))
     log('SUCCESS', 'Loaded maps.')
     return
   } else {
@@ -19,5 +19,3 @@ export const loadMapsFromDb = async (): Promise<void> => {
     throw new Error()
   }
 }
-
-export { maps }
