@@ -1,3 +1,4 @@
+// Axios
 interface ContentUrls {
   '100pxGif': {
     url: string
@@ -113,4 +114,12 @@ export interface GetGfyInfoResponse {
     width: number
     isSticker: boolean
   }
+}
+
+// Command arguments
+
+export interface StringOptions {
+  title: string
+  description: string
+  required: boolean
 }

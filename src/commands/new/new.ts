@@ -2,15 +2,9 @@ import axios from 'axios'
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 
 import { validateInputs } from '../../schemas/commands/new'
-import { GetGfyInfoResponse } from '../../types/commands/new'
+import { GetGfyInfoResponse, StringOptions } from '../../types/commands/new'
 import { formatGfycatUrl } from '../../utils/gfycat'
 import { log } from '../../utils/log'
-
-export interface StringOptions {
-  title: string
-  description: string
-  required: boolean
-}
 
 const stringOptions: StringOptions[] = [
   {
