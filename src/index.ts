@@ -1,4 +1,4 @@
-import { Events } from 'discord.js'
+import { ChatInputCommandInteraction, Events } from 'discord.js'
 
 import { client } from './config/client'
 import { BOT_TOKEN } from './config/envs'
@@ -7,8 +7,21 @@ import { log } from './utils/log'
 
 client.login(BOT_TOKEN)
 
-client.once(Events.ClientReady, c => {
+client.once(Events.ClientReady, async c => {
   log('SUCCESS', `Ready! Logged in as ${c.user.tag}.`)
+})
+
+client.on(Events.InteractionCreate, async i => {
+  if (i.isAutocomplete()) {
+    const command = i.client.commands.get(i.commandName)
+    if (!command) return
+
+    try {
+      await command.autocomplete(i as any)
+    } catch (error) {
+      log('ERROR', error)
+    }
+  }
 })
 
 client.on(Events.InteractionCreate, async i => {

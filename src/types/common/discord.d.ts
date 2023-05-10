@@ -7,6 +7,7 @@ declare module 'discord.js' {
       {
         data: SlashCommandBuilder
         execute: (interaction: ChatInputCommandInteraction) => any
+        autocomplete: (interaction: ChatInputCommandInteraction) => any
       }
     >
   }

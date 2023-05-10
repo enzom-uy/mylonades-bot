@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction } from 'discord.js'
+import { APIApplicationCommandOptionChoice, ChatInputCommandInteraction } from 'discord.js'
 
 export type Data = {
   options: []
@@ -17,4 +17,9 @@ export type Execute = (i: ChatInputCommandInteraction) => any
 export type Command = {
   data: Data
   execute: Execute
+}
+
+export interface MapsFromCache extends APIApplicationCommandOptionChoice {
+  name: string
+  value: string
 }
