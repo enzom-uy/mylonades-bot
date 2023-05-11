@@ -87,7 +87,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
   if (success) {
     const axiosResponse = await getGfycat(gfycatUrlId)
     const newNade = await prismaCreateNade({
-      userDiscordTag: i.user.tag,
+      user: i.user,
       description: description && description,
       title: title as string,
       videoUrl: axiosResponse.gfyItem.mp4Url,

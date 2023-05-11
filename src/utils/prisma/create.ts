@@ -1,4 +1,5 @@
 import { Nade } from '@prisma/client'
+import { User } from 'discord.js'
 
 import { prisma } from '../../config/database'
 
@@ -6,7 +7,7 @@ interface Args {
   videoUrl: string
   title: string
   description?: string | null
-  userDiscordTag: string
+  user: User
   map: string
   nadeType: string
 }
@@ -14,7 +15,7 @@ interface Args {
 export const prismaCreateNade = async ({
   description,
   videoUrl,
-  userDiscordTag,
+  user,
   title,
   map,
   nadeType
@@ -25,8 +26,14 @@ export const prismaCreateNade = async ({
       description: description ? description : null,
       status: 'PENDING',
       author: {
-        connect: {
-          discord_tag: userDiscordTag
+        connectOrCreate: {
+          where: {
+            discord_tag: user.tag
+          },
+          create: {
+            discord_tag: user.tag,
+            name: user.username
+          }
         }
       },
       video_url: videoUrl,
