@@ -18,6 +18,7 @@ model Nade {
   title        String   @db.Text
   map          Map      @relation(fields: [map_id], references: [name])
   author       User     @relation(fields: [author_id], references: [discord_tag])
+  createdAt    DateTime @default(now())
   nadeType     NadeType @relation(fields: [nadeTypeName], references: [name])
   nadeTypeName String
 
