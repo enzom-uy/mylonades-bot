@@ -14,7 +14,7 @@ model Nade {
   map_id       String
   status       Status   @default(PENDING)
   author_id    String
-  video_url    String
+  video_url    String   @unique
   title        String   @db.Text
   map          Map      @relation(fields: [map_id], references: [name])
   author       User     @relation(fields: [author_id], references: [discord_tag])

@@ -86,7 +86,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
   }
   if (success) {
     const axiosResponse = await getGfycat(gfycatUrlId)
-    const newNade = await prismaCreateNade({
+    const { newNade, message, exists } = await prismaCreateNade({
       user: i.user,
       description: description && description,
       title: title as string,
@@ -94,13 +94,22 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
       map,
       nadeType
     })
+    if (exists) {
+      await i.editReply({
+        content: message,
+        files: [exists[0].video_url]
+      })
+    }
     if (newNade) {
       await i.editReply({
         content: `Se ha subido una nueva nade a Mylo Nades:`,
         files: [axiosResponse.gfyItem.mp4Url]
       })
-    } else {
-      await i.editReply('Ha ocurrido un error al intentar subir la granada. Inténtalo de nuevo.')
+    }
+    if (!newNade && !exists) {
+      await i.editReply(
+        'Ocurrió un error intentando subir la granada. Por favor inténtelo nuevamente.'
+      )
     }
   }
   return

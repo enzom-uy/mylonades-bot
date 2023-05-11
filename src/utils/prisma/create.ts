@@ -19,7 +19,19 @@ export const prismaCreateNade = async ({
   title,
   map,
   nadeType
-}: Args): Promise<Nade> => {
+}: Args): Promise<
+  | { message: string; exists: Nade[]; newNade?: undefined }
+  | { newNade: Nade; message?: undefined; exists?: undefined }
+> => {
+  const exists = await prisma.nade.findMany({
+    where: {
+      video_url: videoUrl
+    }
+  })
+  if (exists) {
+    const message = 'Ya existe una granada con el mismo link.'
+    return { message, exists }
+  }
   const newNade = await prisma.nade.create({
     data: {
       title: title,
@@ -49,5 +61,5 @@ export const prismaCreateNade = async ({
       }
     }
   })
-  return newNade
+  return { newNade }
 }
