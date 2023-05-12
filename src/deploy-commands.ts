@@ -10,7 +10,9 @@ import { log } from './utils/log'
 ;(async () => {
   await loadMapsFromDb()
 })()
+
 const commands: Command[] = []
+const rest = new REST().setToken(BOT_TOKEN)
 
 client.commands = new Collection()
 const foldersPath = path.join(__dirname, 'commands')
@@ -36,8 +38,7 @@ for (const folder of commandsFolder) {
   }
 }
 
-const rest = new REST().setToken(BOT_TOKEN)
-
+// eslint-disable-next-line @typescript-eslint/no-extra-semi
 ;(async () => {
   try {
     log('INFO', `Started refreshing ${commands.length} application (/) commands.`)
@@ -53,3 +54,8 @@ const rest = new REST().setToken(BOT_TOKEN)
     log('ERROR', error)
   }
 })()
+
+/* rest */
+/*   .delete(Routes.applicationGuildCommand(APP_ID, GUILD_ID, '1100512417596854432')) */
+/*   .then(() => log('SUCCESS', 'Successfully deleted application command "/ping".')) */
+/*   .catch(e => log('ERROR', e)) */
