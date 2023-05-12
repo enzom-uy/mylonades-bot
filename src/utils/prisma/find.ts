@@ -1,7 +1,8 @@
-import { Nade } from '@prisma/client'
+import { Nade, User } from '@prisma/client'
 
 import { prisma } from '../../config/database'
 
+// Nades
 export const getLastFiveNades = async (): Promise<{
     lastFiveNades: (Nade & {
         author: {
@@ -35,4 +36,17 @@ export const getLastFiveNades = async (): Promise<{
     })
 
     return { lastFiveNades }
+}
+
+// Users
+export const getUsersRanking = async (): Promise<{ topUsers: User[] }> => {
+    const topUsers = await prisma.user.findMany({
+        orderBy: {
+            nades: {
+                _count: 'desc'
+            }
+        }
+    })
+
+    return { topUsers }
 }
