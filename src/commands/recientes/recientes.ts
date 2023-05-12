@@ -1,32 +1,97 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
+import {
+    ActionRow,
+    ActionRowBuilder,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+    MessageActionRowComponent,
+    SlashCommandBuilder,
+    StringSelectMenuBuilder,
+    StringSelectMenuOptionBuilder
+} from 'discord.js'
 
-import { prisma } from '../../config/database'
+import { loadingEmbed } from '../../components/loading-embed'
+import { DiscordComponentConfirmationResponse, Filter } from '../../types/commands/recientes'
+import { embedColor } from '../../utils/bot/embeds'
+import { getLastFiveNades } from '../../utils/prisma/find'
 
 export const data = new SlashCommandBuilder()
-  .setName('recientes')
-  .setDescription('Muestra las últimas 5 granadas que se crearon.')
+    .setName('recientes')
+    .setDescription('Muestra las últimas 5 granadas que se crearon.')
 
 export const execute = async (i: ChatInputCommandInteraction): Promise<void> => {
-  await i.deferReply()
+    await i.deferReply()
 
-  const lastFiveNades = await prisma.nade.findMany({
-    orderBy: {
-      createdAt: 'desc'
-    },
-    take: 5,
-    where: {
-      status: 'APPROVED'
+    const { lastFiveNades } = await getLastFiveNades()
+    if (lastFiveNades.length === 0) {
+        await i.editReply('Todavía no se ha creado ninguna granada.')
+        return
     }
-  })
 
-  if (lastFiveNades.length === 0) {
-    await i.editReply('Todavía no se ha creado ninguna granada.')
+    const embed = new EmbedBuilder()
+        .setTitle('Últimas 5 granadas')
+        .setAuthor({ name: 'Mylo' })
+        .addFields(lastFiveNades.map(nade => ({ name: nade.title, value: nade.video_url })))
+        .setTimestamp()
+
+    await i.followUp({ embeds: [embed] })
+
+    const select = new StringSelectMenuBuilder()
+        .setCustomId('select')
+        .setPlaceholder('Elige la granada...')
+        .addOptions(
+            lastFiveNades.map(nade =>
+                new StringSelectMenuOptionBuilder().setLabel(nade.title).setValue(nade.title)
+            )
+        )
+
+    const row = new ActionRowBuilder().addComponents(
+        select
+    ) as unknown as ActionRow<MessageActionRowComponent>
+
+    const userResponseSelectMenu = await i.followUp({
+        content: '¿Qué granada quieres ver?',
+        components: [row]
+    })
+
+    const collectorFilter: Filter = (interaction: any): boolean => interaction.user.id === i.user.id
+
+    try {
+        const confirmation = (await userResponseSelectMenu.awaitMessageComponent({
+            filter: collectorFilter,
+            time: 60000
+        })) as unknown as DiscordComponentConfirmationResponse
+
+        if (confirmation.customId === 'select') {
+            const selectedNade = lastFiveNades.filter(
+                nade => nade.title === confirmation.values[0]
+            )[0]
+
+            const embedResponse = new EmbedBuilder()
+                .setColor(embedColor)
+                .setTitle(selectedNade.title)
+                .addFields(
+                    { name: 'Título', value: selectedNade.title, inline: true },
+                    { name: 'Mapa', value: selectedNade.map.name, inline: true },
+                    { name: 'Tipo', value: selectedNade.nadeTypeName, inline: true },
+                    { name: 'Autor', value: selectedNade.author.name, inline: true }
+                )
+                .setTimestamp()
+            await confirmation.update({
+                content: `Seleccionaste ${confirmation.values[0]}`,
+                components: []
+            })
+
+            const nadeData = await i.followUp({ embeds: [loadingEmbed('Cargando granada...')] })
+            await i
+                .followUp({ files: [selectedNade.video_url] })
+                .then(() => nadeData.edit({ embeds: [embedResponse] }))
+        }
+        return
+    } catch (e) {
+        await i.editReply({
+            content: 'No se recibió confirmación en 1 minuto, cancelando.',
+            components: []
+        })
+    }
     return
-  }
-
-  await i.editReply({
-    content: 'Aquí están las últimas 5 granadas.',
-    files: [lastFiveNades[0].video_url]
-  })
-  return
 }
