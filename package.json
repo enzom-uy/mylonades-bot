@@ -1,35 +1,35 @@
 {
-  "name": "mylonades-bot",
-  "version": "1.0.0",
-  "description": "Bot de discord de Mylo Nades para Mylo",
-  "main": "index.ts",
-  "author": "Enzo Muñoz",
-  "license": "MIT",
-  "private": true,
-  "scripts": {
-    "dev": "yarn tsc && node ./dist/index.js"
-  },
-  "dependencies": {
-    "@prisma/client": "^4.14.0",
-    "axios": "^1.4.0",
-    "discord.js": "^14.11.0",
-    "dotenv": "^16.0.3",
-    "zod": "^3.21.4"
-  },
-  "devDependencies": {
-    "@types/axios": "^0.14.0",
-    "@types/chalk": "^2.2.0",
-    "@types/node": "^18.16.3",
-    "@typescript-eslint/eslint-plugin": "^5.59.0",
-    "@typescript-eslint/parser": "^5.59.0",
-    "chalk": "4.1.2",
-    "eslint": "^8.39.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-unicorn": "^46.0.0",
-    "node-cache": "^5.1.2",
-    "prettier": "^2.8.7",
-    "prettier-plugin-prisma": "^4.13.0",
-    "prisma": "^4.13.0",
-    "typescript": "^5.0.4"
-  }
+    "name": "mylonades-bot",
+    "version": "1.0.0",
+    "description": "Bot de discord de Mylo Nades para Mylo",
+    "main": "index.ts",
+    "author": "Enzo Muñoz",
+    "license": "MIT",
+    "private": true,
+    "scripts": {
+        "dev": "yarn tsc && node ./dist/index.js"
+    },
+    "dependencies": {
+        "@prisma/client": "^4.14.0",
+        "axios": "^1.4.0",
+        "discord.js": "^14.11.0",
+        "dotenv": "^16.0.3",
+        "zod": "^3.21.4"
+    },
+    "devDependencies": {
+        "@types/axios": "^0.14.0",
+        "@types/chalk": "^2.2.0",
+        "@types/node": "^18.16.3",
+        "@typescript-eslint/eslint-plugin": "^5.59.0",
+        "@typescript-eslint/parser": "^5.59.0",
+        "chalk": "4.1.2",
+        "eslint": "^8.39.0",
+        "eslint-plugin-import": "^2.27.5",
+        "eslint-plugin-unicorn": "^46.0.0",
+        "node-cache": "^5.1.2",
+        "prettier": "^2.8.7",
+        "prettier-plugin-prisma": "^4.13.0",
+        "prisma": "^4.13.0",
+        "typescript": "^5.0.4"
+    }
 }
