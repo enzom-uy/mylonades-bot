@@ -7,8 +7,16 @@ import { log } from './utils/log'
 
 client.login(BOT_TOKEN)
 
-client.once(Events.ClientReady, async c => {
+client.once(Events.ClientReady, c => {
   log('SUCCESS', `Ready! Logged in as ${c.user.tag}.`)
+})
+
+client.on('messageCreate', message => {
+  if (message.author.id === client.user?.id) {
+    setTimeout(() => {
+      message.delete()
+    }, 900000)
+  }
 })
 
 client.on(Events.InteractionCreate, async i => {
