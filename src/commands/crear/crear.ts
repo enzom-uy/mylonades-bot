@@ -1,6 +1,7 @@
 import {
   AutocompleteInteraction,
   ChatInputCommandInteraction,
+  Message,
   SlashCommandBuilder
 } from 'discord.js'
 
@@ -11,6 +12,7 @@ import { StringOptions } from '../../types/commands/new'
 import { getGfycat } from '../../utils/axios/get-gfycat'
 import { compareRequired } from '../../utils/commands/sort-required-first'
 import { formatGfycatUrl } from '../../utils/gfycat'
+import { log } from '../../utils/log'
 import { prismaCreateNade } from '../../utils/prisma/create'
 
 const stringOptions: StringOptions[] = [
@@ -33,7 +35,9 @@ const stringOptions: StringOptions[] = [
 ]
 
 const optionsRequiredFirst = stringOptions.sort(compareRequired)
-export const data = new SlashCommandBuilder().setName('new').setDescription('Upload a new nade.')
+export const data = new SlashCommandBuilder()
+  .setName('crear')
+  .setDescription('Crea una nueva granada.')
 data.addStringOption(o =>
   o.setName('mapa').setDescription('Nombre del mapa.').setAutocomplete(true).setRequired(true)
 )
@@ -65,7 +69,9 @@ export const autocomplete = async (i: AutocompleteInteraction): Promise<void> =>
   if (filtered) await i.respond(filtered.map(choice => ({ name: choice, value: choice })))
 }
 
-export const execute = async (i: ChatInputCommandInteraction): Promise<void> => {
+export const execute = async (
+  i: ChatInputCommandInteraction
+): Promise<Message<boolean> | undefined> => {
   await i.deferReply()
   const title = i.options.getString('título')
   const description = i.options.getString('descripción')
@@ -82,7 +88,6 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
 
   if (success === false && errorMessage && errorMessage.length > 0) {
     await i.editReply(String(errorMessage))
-    return
   }
   if (success) {
     const axiosResponse = await getGfycat(gfycatUrlId)
@@ -94,7 +99,8 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
       map,
       nadeType
     })
-    if (exists) {
+    if (exists && exists.length > 0) {
+      log('LOG', exists)
       await i.editReply({
         content: message,
         files: [exists[0].video_url]

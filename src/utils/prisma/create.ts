@@ -28,7 +28,7 @@ export const prismaCreateNade = async ({
       video_url: videoUrl
     }
   })
-  if (exists) {
+  if (exists.length > 0) {
     const message = 'Ya existe una granada con el mismo link.'
     return { message, exists }
   }
