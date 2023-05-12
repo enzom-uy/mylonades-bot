@@ -1,22 +1,22 @@
-import { Events } from 'discord.js'
+import { DiscordAPIError, Events } from 'discord.js'
 
 import { client } from './config/client'
 import { BOT_TOKEN } from './config/envs'
 import './deploy-commands'
+import { deleteBotMessages } from './utils/bot/delete-bot-messages'
 import { log } from './utils/log'
+
+const fifteenMinInMs = 900000
 
 client.login(BOT_TOKEN)
 
-client.once(Events.ClientReady, c => {
+client.once(Events.ClientReady, async c => {
   log('SUCCESS', `Ready! Logged in as ${c.user.tag}.`)
-})
 
-client.on('messageCreate', message => {
-  if (message.author.id === client.user?.id) {
-    setTimeout(() => {
-      message.delete()
-    }, 900000)
-  }
+  const channels = client.channels.cache.values()
+  setInterval(() => {
+    deleteBotMessages({ client, channels }).catch((e: DiscordAPIError) => log('ERROR', e.message))
+  }, fifteenMinInMs)
 })
 
 client.on(Events.InteractionCreate, async i => {
