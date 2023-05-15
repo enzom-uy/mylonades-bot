@@ -6,7 +6,7 @@ import './deploy-commands'
 import { deleteBotMessages } from './utils/bot/delete-bot-messages'
 import { log } from './utils/log'
 
-const fifteenMinInMs = 900000
+const sevenMinInMs = 420000
 
 client.login(BOT_TOKEN)
 
@@ -18,7 +18,7 @@ client.once(Events.ClientReady, async c => {
         deleteBotMessages({ client, channels }).catch((e: DiscordAPIError) =>
             log('ERROR', e.message)
         )
-    }, fifteenMinInMs)
+    }, sevenMinInMs)
 })
 
 client.on(Events.InteractionCreate, async i => {
