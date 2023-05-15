@@ -81,7 +81,8 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                 components: []
             })
 
-            const nadeData = await i.followUp({ embeds: [loadingEmbed('Cargando granada...')] })
+            await userResponseSelectMenu.delete()
+            const nadeData = await i.editReply({ embeds: [loadingEmbed('Cargando granada...')] })
             await i
                 .followUp({ files: [selectedNade.video_url] })
                 .then(() => nadeData.edit({ embeds: [embedResponse] }))
