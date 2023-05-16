@@ -12,7 +12,10 @@ import {
 import { loadingEmbed } from '../../components/loading-embed'
 import { DiscordComponentConfirmationResponse, Filter } from '../../types/commands/recientes'
 import { embedColor } from '../../utils/bot/embeds'
+import { log } from '../../utils/log'
 import { getLastFiveNades } from '../../utils/prisma/find'
+
+const selectMenuContent = '¿Qué granada quieres ver?'
 
 export const data = new SlashCommandBuilder()
     .setName('recientes')
@@ -49,7 +52,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
     ) as unknown as ActionRow<MessageActionRowComponent>
 
     const userResponseSelectMenu = await i.followUp({
-        content: '¿Qué granada quieres ver?',
+        content: selectMenuContent,
         components: [row]
     })
 
@@ -57,8 +60,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
 
     try {
         const confirmation = (await userResponseSelectMenu.awaitMessageComponent({
-            filter: collectorFilter,
-            time: 60000
+            filter: collectorFilter
         })) as unknown as DiscordComponentConfirmationResponse
 
         if (confirmation.customId === 'select') {
@@ -89,10 +91,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
         }
         return
     } catch (e) {
-        await i.editReply({
-            content: 'No se recibió confirmación en 1 minuto, cancelando.',
-            components: []
-        })
+        log('ERROR', e)
     }
     return
 }
