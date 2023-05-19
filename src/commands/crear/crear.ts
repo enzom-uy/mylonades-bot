@@ -6,9 +6,9 @@ import {
 } from 'discord.js'
 
 import { myCache } from '../../config/cache'
-import { validateInputs } from '../../schemas/commands/new'
+import { validateInputs } from '../../schemas/commands/crear'
 import { MapsFromCache, NadeTypesFromCache } from '../../types/commands'
-import { StringOptions } from '../../types/commands/new'
+import { StringOptions } from '../../types/commands/crear'
 import { compareRequired } from '../../utils/commands/sort-required-first'
 import { log } from '../../utils/log'
 import { prismaCreateNade } from '../../utils/prisma/create'
