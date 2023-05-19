@@ -17,6 +17,7 @@ export const loadMapsFromDb = async (): Promise<void> => {
             nadeTypesFromDb.map(type => ({ name: type.name, value: type.name }))
         )
         log('SUCCESS', 'Loaded maps.')
+
         return
     } else {
         log('ERROR', 'Something went wrong while trying to retrieve maps and nade types data.')

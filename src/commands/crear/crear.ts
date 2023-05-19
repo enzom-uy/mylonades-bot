@@ -32,6 +32,18 @@ const stringOptions: StringOptions[] = [
         description: 'Link de Gfycat asociado a la granada.',
         required: true
     }
+    /* { */
+    /*     title: 'mapa', */
+    /*     description: 'Nombre del mapa.', */
+    /*     required: true, */
+    /*     autocomplete: true */
+    /* }, */
+    /* { */
+    /*     title: 'tipo', */
+    /*     description: 'Tipo de la granada.', */
+    /*     required: true, */
+    /*     autocomplete: true */
+    /* } */
 ]
 
 const optionsRequiredFirst = stringOptions.sort(compareRequired)
@@ -46,7 +58,11 @@ data.addStringOption(o =>
 )
 optionsRequiredFirst.forEach(option => {
     data.addStringOption(opt =>
-        opt.setName(option.title).setDescription(option.description).setRequired(option.required)
+        opt
+            .setName(option.title)
+            .setDescription(option.description)
+            .setRequired(option.required)
+            .setAutocomplete(option.autocomplete ? true : false)
     )
 })
 

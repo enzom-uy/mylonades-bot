@@ -30,15 +30,15 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
         return
     }
 
-    const embed = new EmbedBuilder()
+    const embedWithNades = new EmbedBuilder()
         .setTitle('Últimas 5 granadas')
         .setAuthor({ name: 'Mylo' })
         .addFields(lastFiveNades.map(nade => ({ name: nade.title, value: nade.video_url })))
         .setTimestamp()
 
-    await i.followUp({ embeds: [embed] })
+    await i.followUp({ embeds: [embedWithNades] })
 
-    const select = new StringSelectMenuBuilder()
+    const selectNadeMenu = new StringSelectMenuBuilder()
         .setCustomId('select')
         .setPlaceholder('Elige la granada...')
         .addOptions(
@@ -48,7 +48,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
         )
 
     const row = new ActionRowBuilder().addComponents(
-        select
+        selectNadeMenu
     ) as unknown as ActionRow<MessageActionRowComponent>
 
     const userResponseSelectMenu = await i.followUp({
@@ -78,10 +78,6 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                     { name: 'Autor', value: selectedNade.author.name, inline: true }
                 )
                 .setTimestamp()
-            await confirmation.update({
-                content: `Seleccionaste ${confirmation.values[0]}`,
-                components: []
-            })
 
             await userResponseSelectMenu.delete()
             const nadeData = await i.editReply({ embeds: [loadingEmbed('Cargando granada...')] })
