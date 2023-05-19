@@ -3,13 +3,13 @@ import { z, ZodError, ZodSchema } from 'zod'
 interface Inputs {
     título: string
     descripción?: string | null
-    gfycat_url: string
+    videoUrl: string
 }
 
 export const cmdNewSchema: ZodSchema<Inputs> = z.object({
     título: z.string(),
     descripcion: z.string().optional().nullish(),
-    gfycat_url: z.string().url().startsWith('https://gfycat.com/')
+    videoUrl: z.string().url().startsWith('https://media.discordapp.net/')
 })
 
 export const validateInputs = (

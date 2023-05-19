@@ -9,9 +9,7 @@ import { myCache } from '../../config/cache'
 import { validateInputs } from '../../schemas/commands/new'
 import { MapsFromCache, NadeTypesFromCache } from '../../types/commands'
 import { StringOptions } from '../../types/commands/new'
-import { getGfycat } from '../../utils/axios/get-gfycat'
 import { compareRequired } from '../../utils/commands/sort-required-first'
-import { formatGfycatUrl } from '../../utils/gfycat'
 import { log } from '../../utils/log'
 import { prismaCreateNade } from '../../utils/prisma/create'
 
@@ -26,30 +24,16 @@ const stringOptions: StringOptions[] = [
         description:
             'Descripción de la granada, por ejemplo: "Humo jumpthrow desde base TT para tapar jungla en A."',
         required: false
-    },
-    {
-        title: 'gfycat_url',
-        description: 'Link de Gfycat asociado a la granada.',
-        required: true
     }
-    /* { */
-    /*     title: 'mapa', */
-    /*     description: 'Nombre del mapa.', */
-    /*     required: true, */
-    /*     autocomplete: true */
-    /* }, */
-    /* { */
-    /*     title: 'tipo', */
-    /*     description: 'Tipo de la granada.', */
-    /*     required: true, */
-    /*     autocomplete: true */
-    /* } */
 ]
 
 const optionsRequiredFirst = stringOptions.sort(compareRequired)
 export const data = new SlashCommandBuilder()
     .setName('crear')
     .setDescription('Crea una nueva granada.')
+data.addAttachmentOption(o =>
+    o.setName('video').setDescription('Video de la granada.').setRequired(true)
+)
 data.addStringOption(o =>
     o.setName('mapa').setDescription('Nombre del mapa.').setAutocomplete(true).setRequired(true)
 )
@@ -93,25 +77,23 @@ export const execute = async (
     const description = i.options.getString('descripción')
     const nadeType = i.options.getString('tipo') as string
     const map = i.options.getString('mapa') as string
-    const gfycatUrl = i.options.getString('gfycat_url') as string
-    const gfycatUrlId = formatGfycatUrl(gfycatUrl)
+    const attachment = i.options.getAttachment('video')
 
     const { success, errorMessage } = validateInputs({
         título: title as string,
         descripción: description,
-        gfycat_url: gfycatUrl
+        videoUrl: attachment?.proxyURL as string
     })
 
     if (success === false && errorMessage && errorMessage.length > 0) {
         await i.editReply(String(errorMessage))
     }
     if (success) {
-        const axiosResponse = await getGfycat(gfycatUrlId)
         const { newNade, message, exists } = await prismaCreateNade({
             user: i.user,
             description: description && description,
             title: title as string,
-            videoUrl: axiosResponse.gfyItem.mp4Url,
+            videoUrl: attachment?.proxyURL as string,
             map,
             nadeType
         })
@@ -125,7 +107,7 @@ export const execute = async (
         if (newNade) {
             await i.editReply({
                 content: `Se ha subido una nueva nade a Mylo Nades:`,
-                files: [axiosResponse.gfyItem.mp4Url]
+                files: [attachment?.proxyURL as string]
             })
         }
         if (!newNade && !exists) {

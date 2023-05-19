@@ -1,6 +1,7 @@
 import { Nade, User } from '@prisma/client'
 
 import { prisma } from '../../config/database'
+import { log } from '../log'
 
 // Nades
 export const getLastFiveNades = async (): Promise<{
@@ -34,7 +35,7 @@ export const getLastFiveNades = async (): Promise<{
             }
         }
     })
-
+    log('INFO', lastFiveNades)
     return { lastFiveNades }
 }
 
