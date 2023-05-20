@@ -2,6 +2,7 @@ import { Nade } from '@prisma/client'
 import { User } from 'discord.js'
 
 import { prisma } from '../../config/database'
+import { log } from '../log'
 
 interface Args {
     videoUrl: string
@@ -23,13 +24,17 @@ export const prismaCreateNade = async ({
     | { message: string; exists: Nade[]; newNade?: undefined }
     | { newNade: Nade; message?: undefined; exists?: undefined }
 > => {
+    const filename = videoUrl.split('/').slice(-1)[0]
     const exists = await prisma.nade.findMany({
         where: {
-            video_url: videoUrl
+            video_url: {
+                contains: filename
+            }
         }
     })
+    log('INFO', exists)
     if (exists.length > 0) {
-        const message = 'Ya existe una granada con el mismo link.'
+        const message = 'Ya hay una granada registrada con el mismo nombre de archivo.'
         return { message, exists }
     }
     const newNade = await prisma.nade.create({

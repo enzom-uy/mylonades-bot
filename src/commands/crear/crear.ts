@@ -10,7 +10,6 @@ import { validateInputs } from '../../schemas/commands/crear'
 import { MapsFromCache, NadeTypesFromCache } from '../../types/commands'
 import { StringOptions } from '../../types/commands/crear'
 import { compareRequired } from '../../utils/commands/sort-required-first'
-import { log } from '../../utils/log'
 import { prismaCreateNade } from '../../utils/prisma/create'
 
 const stringOptions: StringOptions[] = [
@@ -98,11 +97,11 @@ export const execute = async (
             nadeType
         })
         if (exists && exists.length > 0) {
-            log('LOG', exists)
             await i.editReply({
                 content: message,
                 files: [exists[0].video_url]
             })
+            return
         }
         if (newNade) {
             await i.editReply({
