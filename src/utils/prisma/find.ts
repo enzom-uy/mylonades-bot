@@ -4,16 +4,17 @@ import { prisma } from '../../config/database'
 import { log } from '../log'
 
 // Nades
-export const getLastFiveNades = async (): Promise<{
-    lastFiveNades: (Nade & {
-        author: {
-            name: string
-        }
-        map: {
-            name: string
-        }
-    })[]
-}> => {
+
+export interface NadeWithAuthorAndMap extends Nade {
+    author: {
+        name: string
+    }
+    map: {
+        name: string
+    }
+}
+
+export const getLastFiveNades = async (): Promise<{ lastFiveNades: NadeWithAuthorAndMap[] }> => {
     const lastFiveNades = await prisma.nade.findMany({
         orderBy: {
             createdAt: 'desc'
@@ -37,6 +38,45 @@ export const getLastFiveNades = async (): Promise<{
     })
     log('INFO', lastFiveNades)
     return { lastFiveNades }
+}
+
+export const getNades = async ({
+    query,
+    map,
+    nadeType
+}: {
+    query?: string | null
+    map?: string | null
+    nadeType?: string | null
+}): Promise<{ nades: NadeWithAuthorAndMap[] }> => {
+    const nades = await prisma.nade.findMany({
+        where: {
+            OR: [
+                {
+                    title: query ? { contains: query } : undefined
+                },
+                {
+                    description: query ? { contains: query } : null
+                }
+            ],
+            map: map ? { name: map } : undefined,
+            nadeTypeName: nadeType ? nadeType : undefined
+        },
+        include: {
+            author: {
+                select: {
+                    name: true
+                }
+            },
+            map: {
+                select: {
+                    name: true
+                }
+            }
+        }
+    })
+
+    return { nades }
 }
 
 // Users
