@@ -5,10 +5,9 @@ import {
     SlashCommandBuilder
 } from 'discord.js'
 
-import { myCache } from '../../config/cache'
 import { validateInputs } from '../../schemas/commands/crear'
-import { MapsFromCache, NadeTypesFromCache } from '../../types/commands'
 import { StringOptions } from '../../types/commands/crear'
+import { handleMapAndNadeTypeAutocomplete } from '../../utils/commands/handle-autocomplete'
 import { compareRequired } from '../../utils/commands/sort-required-first'
 import { prismaCreateNade } from '../../utils/prisma/create'
 
@@ -50,22 +49,7 @@ optionsRequiredFirst.forEach(option => {
 })
 
 export const autocomplete = async (i: AutocompleteInteraction): Promise<void> => {
-    const focusedOption = i.options.getFocused(true)
-    let choices
-
-    if (focusedOption.name === 'mapa') {
-        const mapsFromCache = myCache.get('maps') as MapsFromCache[]
-        choices = mapsFromCache.map(map => map.name)
-    }
-
-    if (focusedOption.name === 'tipo') {
-        const nadeTypesFromCache = myCache.get('nadeTypes') as NadeTypesFromCache[]
-        choices = nadeTypesFromCache.map(type => type.name)
-    }
-    const filtered = choices?.filter(choice =>
-        choice.toLowerCase().startsWith(focusedOption.value.toLowerCase())
-    )
-    if (filtered) await i.respond(filtered.map(choice => ({ name: choice, value: choice })))
+    await handleMapAndNadeTypeAutocomplete(i)
 }
 
 export const execute = async (

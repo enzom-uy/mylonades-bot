@@ -1,15 +1,7 @@
-import {
-    ActionRow,
-    ActionRowBuilder,
-    ChatInputCommandInteraction,
-    EmbedBuilder,
-    MessageActionRowComponent,
-    SlashCommandBuilder,
-    StringSelectMenuBuilder,
-    StringSelectMenuOptionBuilder
-} from 'discord.js'
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
 
-import { loadingEmbed } from '../../components/loading-embed'
+import { loadingEmbedComponent } from '../../components/loading-embed'
+import { selectNadeMenuComponent } from '../../components/select-nade-menu'
 import { DiscordComponentConfirmationResponse, Filter } from '../../types/commands/recientes'
 import { embedColor } from '../../utils/bot/embeds'
 import { log } from '../../utils/log'
@@ -38,18 +30,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
 
     await i.followUp({ embeds: [embedWithNades] })
 
-    const selectNadeMenu = new StringSelectMenuBuilder()
-        .setCustomId('select')
-        .setPlaceholder('Elige la granada...')
-        .addOptions(
-            lastFiveNades.map(nade =>
-                new StringSelectMenuOptionBuilder().setLabel(nade.title).setValue(nade.title)
-            )
-        )
-
-    const row = new ActionRowBuilder().addComponents(
-        selectNadeMenu
-    ) as unknown as ActionRow<MessageActionRowComponent>
+    const { row } = selectNadeMenuComponent(lastFiveNades)
 
     const userResponseSelectMenu = await i.followUp({
         content: selectMenuContent,
@@ -80,7 +61,9 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                 .setTimestamp()
 
             await userResponseSelectMenu.delete()
-            const nadeData = await i.editReply({ embeds: [loadingEmbed('Cargando granada...')] })
+            const nadeData = await i.editReply({
+                embeds: [loadingEmbedComponent('Cargando granada...')]
+            })
             await i
                 .followUp({ files: [selectedNade.video_url] })
                 .then(() => nadeData.edit({ embeds: [embedResponse] }))
