@@ -18,7 +18,6 @@ import { handleMapAndNadeTypeAutocomplete } from '../../utils/commands/handle-au
 import { log } from '../../utils/log'
 import { getPaginatedData } from '../../utils/paginate'
 import { getNades } from '../../utils/prisma/find'
-import { client } from '../../config/client'
 
 const SELECT_MENU_CONTENT = '¿Qué granada quieres ver?'
 
@@ -73,20 +72,18 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
     ) as unknown as ActionRow<MessageActionRowComponent>
 
     const handleShowNades = async (): Promise<void> => {
-        // Le muestro al usuario las granadas encontradas.
+        // Create embed with all the nades and show them to the user.
         const showNadesEmbed = embedWithNadesComponent({
             title: 'Granadas encontradas',
             author: 'Mylo',
             nades: paginatedNades
         })
-
         await i.editReply({
             embeds: [showNadesEmbed]
         })
 
+        // Create Select Menu with all the nades and show it to the user.
         const { row } = selectNadeMenuComponent(paginatedNades)
-
-        // Le muestro al usuario un Select Menu con las granadas encontradas.
         const userResponseSelectMenu = await i.followUp({
             content: SELECT_MENU_CONTENT,
             components: [row]
@@ -100,13 +97,13 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                 filter: collectorFilter
             })) as unknown as DiscordComponentConfirmationResponse
 
-            // El usuario elige una granada del Select Menu.
+            // User chooses a nade from the Select Menu.
             if (confirmation.customId === 'select') {
                 const selectedNade = paginatedNades.filter(
                     nade => nade.title === confirmation.values[0]
                 )[0]
 
-                // Creo el Embed con la granada seleccionada.
+                // Create a new embed with the selected nade info.
                 const embedResponse = embedResponseNadeComponent(selectedNade)
 
                 await userResponseSelectMenu.delete()
@@ -115,7 +112,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                     embeds: [loadingEmbedComponent('Cargando granada...')]
                 })
 
-                // Le respondo con el mensaje del bot con el Embed de la granada seleccionada.
+                // Answer the user with the previous made embed and the nade video.
                 const nadeVideo = await i.followUp({ files: [selectedNade.video_url] })
                 await nadeData.edit({ embeds: [embedResponse] })
 
@@ -130,16 +127,15 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
 
                 if (buttonConfirmation.customId === 'cancel') {
                     shouldContinue = false
-                    log('INFO', `Continúo? ${shouldContinue}`)
 
+                    // Delete all messages cause user doesn't want to continue looking for nades.
                     await nadeData.delete()
                     await nadeVideo.delete()
                     await showButton.delete()
-
                     return
                 }
-
-                log('INFO', 'Continúo.')
+                // Delete all messages but nade info because is the "root" message.
+                // I need it to edit it and start the interaction again.
                 await showButton.delete()
                 await nadeVideo.delete()
                 await userResponseSelectMenu.delete()
