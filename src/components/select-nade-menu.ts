@@ -9,12 +9,14 @@ import {
 
 import { NadeWithAuthorAndMap } from '../utils/prisma/find'
 
+export const SELECT_MENU_CONTENT = '¿Qué granada quieres ver?'
+
 export const selectNadeMenuComponent = (
     nades: NadeWithAuthorAndMap[] | Nade[]
 ): { row: ActionRow<MessageActionRowComponent> } => {
     const selectMenu = new StringSelectMenuBuilder()
         .setCustomId('select')
-        .setPlaceholder('Elige la granada...')
+        .setPlaceholder(SELECT_MENU_CONTENT)
         .addOptions(
             nades.map(nade =>
                 new StringSelectMenuOptionBuilder().setLabel(nade.title).setValue(nade.title)
