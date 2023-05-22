@@ -1,25 +1,22 @@
 import {
     ActionRow,
-    ActionRowBuilder,
     AutocompleteInteraction,
-    ButtonBuilder,
-    ButtonStyle,
     ChatInputCommandInteraction,
     MessageActionRowComponent,
     SlashCommandBuilder
 } from 'discord.js'
 
+import { confirmButtonRow } from '../../components/confirm-looking-nades'
 import { embedResponseNadeComponent } from '../../components/embed-response-nade'
 import { embedWithNadesComponent } from '../../components/embed-with-nades'
 import { loadingEmbedComponent } from '../../components/loading-embed'
-import { selectNadeMenuComponent } from '../../components/select-nade-menu'
+import { paginationArrowsComponent } from '../../components/pagination-arrows'
+import { SELECT_MENU_CONTENT, selectNadeMenuComponent } from '../../components/select-nade-menu'
 import { DiscordComponentConfirmationResponse, Filter } from '../../types/commands/recientes'
 import { handleMapAndNadeTypeAutocomplete } from '../../utils/commands/handle-autocomplete'
 import { log } from '../../utils/log'
 import { getPaginatedData } from '../../utils/paginate'
 import { getNades } from '../../utils/prisma/find'
-
-const SELECT_MENU_CONTENT = '¿Qué granada quieres ver?'
 
 export const data = new SlashCommandBuilder()
     .setName('buscar')
@@ -45,31 +42,19 @@ export const autocomplete = async (i: AutocompleteInteraction): Promise<void> =>
 
 export const execute = async (i: ChatInputCommandInteraction): Promise<void> => {
     await i.deferReply()
+
     const query = i.options.getString('query')
     const map = i.options.getString('mapa')
     const nadeType = i.options.getString('tipo')
+    const collectorFilter: Filter = (interaction): boolean => interaction.user.id === i.user.id
 
     const { nades } = await getNades({ query, map, nadeType })
 
     let currentPage = 1
     const pageSize = 6
-    const paginatedNades = getPaginatedData(currentPage, pageSize, nades)
+    let paginatedNades = getPaginatedData(currentPage, pageSize, nades)
 
     let shouldContinue = true
-
-    const confirmButton = new ButtonBuilder()
-        .setCustomId('confirm')
-        .setLabel('Continuar')
-        .setStyle(ButtonStyle.Primary)
-
-    const cancelButton = new ButtonBuilder()
-        .setCustomId('cancel')
-        .setLabel('Cancel')
-        .setStyle(ButtonStyle.Secondary)
-    const buttonRow = new ActionRowBuilder().addComponents(
-        confirmButton,
-        cancelButton
-    ) as unknown as ActionRow<MessageActionRowComponent>
 
     const handleShowNades = async (): Promise<void> => {
         // Create embed with all the nades and show them to the user.
@@ -78,9 +63,26 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
             author: 'Mylo',
             nades: paginatedNades
         })
-        await i.editReply({
-            embeds: [showNadesEmbed]
+
+        const paginationArrows = await i.editReply({
+            embeds: [showNadesEmbed],
+            components: [
+                paginationArrowsComponent() as unknown as ActionRow<MessageActionRowComponent>
+            ]
         })
+
+        const paginationArrowsConfirmation = await paginationArrows
+            .awaitMessageComponent({
+                filter: collectorFilter
+            })
+            .then(res => res.customId)
+        log('INFO', paginationArrowsConfirmation)
+        /**/
+        /* if (paginationArrowsConfirmation.customId === 'left') { */
+        /*     log('INFO', 'El usuario quiere ir a la izquierda.') */
+        /* } else { */
+        /*     log('INFO', 'El usuario quiere ir a la derecha.') */
+        /* } */
 
         // Create Select Menu with all the nades and show it to the user.
         const { row } = selectNadeMenuComponent(paginatedNades)
@@ -89,18 +91,18 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
             components: [row]
         })
 
-        const collectorFilter: Filter = (interaction: any): boolean =>
-            interaction.user.id === i.user.id
-
         try {
-            const confirmation = (await userResponseSelectMenu.awaitMessageComponent({
-                filter: collectorFilter
-            })) as unknown as DiscordComponentConfirmationResponse
+            const userSelectConfirmation = (await userResponseSelectMenu
+                .awaitMessageComponent({
+                    filter: collectorFilter
+                })
+                .then(res => res.customId)) as unknown as DiscordComponentConfirmationResponse
+            log('INFO', userSelectConfirmation)
 
             // User chooses a nade from the Select Menu.
-            if (confirmation.customId === 'select') {
+            if (userSelectConfirmation.customId === 'select') {
                 const selectedNade = paginatedNades.filter(
-                    nade => nade.title === confirmation.values[0]
+                    nade => nade.title === userSelectConfirmation.values[0]
                 )[0]
 
                 // Create a new embed with the selected nade info.
@@ -118,7 +120,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
 
                 const showButton = await i.followUp({
                     content: `¿Quieres volver a ver las granadas?`,
-                    components: [buttonRow]
+                    components: [confirmButtonRow]
                 })
 
                 const buttonConfirmation = (await showButton.awaitMessageComponent({
