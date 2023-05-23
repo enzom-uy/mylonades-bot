@@ -71,12 +71,11 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
             ]
         })
 
-        const paginationArrowsConfirmation = await paginationArrows
-            .awaitMessageComponent({
-                filter: collectorFilter
-            })
-            .then(res => res.customId)
+        const paginationArrowsConfirmation = paginationArrows.awaitMessageComponent({
+            filter: collectorFilter
+        })
         log('INFO', paginationArrowsConfirmation)
+
         /**/
         /* if (paginationArrowsConfirmation.customId === 'left') { */
         /*     log('INFO', 'El usuario quiere ir a la izquierda.') */
@@ -85,6 +84,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
         /* } */
 
         // Create Select Menu with all the nades and show it to the user.
+        //
         const { row } = selectNadeMenuComponent(paginatedNades)
         const userResponseSelectMenu = await i.followUp({
             content: SELECT_MENU_CONTENT,
@@ -92,12 +92,9 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
         })
 
         try {
-            const userSelectConfirmation = (await userResponseSelectMenu
-                .awaitMessageComponent({
-                    filter: collectorFilter
-                })
-                .then(res => res.customId)) as unknown as DiscordComponentConfirmationResponse
-            log('INFO', userSelectConfirmation)
+            const userSelectConfirmation = userResponseSelectMenu.awaitMessageComponent({
+                filter: collectorFilter
+            }) as unknown as DiscordComponentConfirmationResponse
 
             // User chooses a nade from the Select Menu.
             if (userSelectConfirmation.customId === 'select') {
