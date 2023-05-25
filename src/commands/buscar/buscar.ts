@@ -10,8 +10,9 @@ import { confirmButtonRow } from '../../components/confirm-looking-nades'
 import { embedResponseNadeComponent } from '../../components/embed-response-nade'
 import { embedWithNadesComponent } from '../../components/embed-with-nades'
 import { loadingEmbedComponent } from '../../components/loading-embed'
-import { paginationArrowsComponent } from '../../components/pagination-arrows'
+import { CustomId, handlePaginationArrows } from '../../components/pagination-arrows'
 import { SELECT_MENU_CONTENT, selectNadeMenuComponent } from '../../components/select-nade-menu'
+import { InteractionFailedError } from '../../errors/errors'
 import { DiscordComponentConfirmationResponse, Filter } from '../../types/commands/recientes'
 import { handleMapAndNadeTypeAutocomplete } from '../../utils/commands/handle-autocomplete'
 import { log } from '../../utils/log'
@@ -52,40 +53,47 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
 
     let currentPage = 1
     const pageSize = 6
-    let paginatedNades = getPaginatedData(currentPage, pageSize, nades)
+    let { currentNades, endIndex } = getPaginatedData(currentPage, pageSize, nades)
 
     let shouldContinue = true
 
     const handleShowNades = async (): Promise<void> => {
         // Create embed with all the nades and show them to the user.
-        const showNadesEmbed = embedWithNadesComponent({
+        const showFoundedNadesEmbed = embedWithNadesComponent({
             title: 'Granadas encontradas',
             author: 'Mylo',
-            nades: paginatedNades
+            nades: currentNades
+        })
+
+        const { paginationArrowsComponent } = handlePaginationArrows({
+            currentPage: currentPage,
+            endIndex
         })
 
         const paginationArrows = await i.editReply({
-            embeds: [showNadesEmbed],
+            embeds: [showFoundedNadesEmbed],
             components: [
-                paginationArrowsComponent() as unknown as ActionRow<MessageActionRowComponent>
+                paginationArrowsComponent as unknown as ActionRow<MessageActionRowComponent>
             ]
         })
 
-        const paginationArrowsConfirmation = paginationArrows.awaitMessageComponent({
-            filter: collectorFilter
-        })
-        log('INFO', paginationArrowsConfirmation)
+        try {
+            const paginationArrowsConfirmation = await paginationArrows.awaitMessageComponent({
+                filter: collectorFilter
+            })
+            if (!paginationArrowsConfirmation) {
+                log('ERROR', 'No hubo confirmación.')
+                return
+            }
+            const userClicked = paginationArrowsConfirmation.customId as CustomId
 
-        /**/
-        /* if (paginationArrowsConfirmation.customId === 'left') { */
-        /*     log('INFO', 'El usuario quiere ir a la izquierda.') */
-        /* } else { */
-        /*     log('INFO', 'El usuario quiere ir a la derecha.') */
-        /* } */
+            if (userClicked === 'left' && currentPage <= 1)
+                log('INFO', 'El usuario quiso ir a la izquierda pero ya está en la primera página.')
+        } catch (e) {
+            throw new InteractionFailedError()
+        }
 
-        // Create Select Menu with all the nades and show it to the user.
-        //
-        const { row } = selectNadeMenuComponent(paginatedNades)
+        const { row } = selectNadeMenuComponent(currentNades)
         const userResponseSelectMenu = await i.followUp({
             content: SELECT_MENU_CONTENT,
             components: [row]
@@ -98,7 +106,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
 
             // User chooses a nade from the Select Menu.
             if (userSelectConfirmation.customId === 'select') {
-                const selectedNade = paginatedNades.filter(
+                const selectedNade = currentNades.filter(
                     nade => nade.title === userSelectConfirmation.values[0]
                 )[0]
 
@@ -143,7 +151,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
             }
             return
         } catch (e) {
-            log('ERROR', e)
+            throw new InteractionFailedError()
         }
     }
     while (shouldContinue) {
