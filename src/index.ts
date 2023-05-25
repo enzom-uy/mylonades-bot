@@ -47,20 +47,6 @@ client.on(Events.InteractionCreate, async i => {
         await command.execute(i)
     } catch (error) {
         log('ERROR', error)
-        if (i.replied || i.deferred) {
-            await i.followUp({
-                content:
-                    'El comando ha sido borrado u ocurrió un error que imposibilitó su continuación.',
-                ephemeral: true
-            })
-            return
-        } else {
-            await i.reply({
-                content:
-                    'El comando ha sido borrado u ocurrió un error que imposibilitó su continuación.',
-                ephemeral: true
-            })
-            return
-        }
+        return
     }
 })
