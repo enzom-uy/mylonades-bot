@@ -62,10 +62,17 @@ export const execute = async (
     const map = i.options.getString('mapa') as string
     const attachment = i.options.getAttachment('video')
 
+    if (!attachment?.contentType?.startsWith('video/')) {
+        await i.editReply({
+            content: 'El archivo adjuntado no es un video. No se subió ninguna granada.'
+        })
+        return
+    }
+
     const { success, errorMessage } = validateInputs({
         título: title as string,
         descripción: description,
-        videoUrl: attachment?.proxyURL as string
+        videoUrl: attachment.proxyURL
     })
 
     if (success === false && errorMessage && errorMessage.length > 0) {
@@ -76,7 +83,7 @@ export const execute = async (
             user: i.user,
             description: description && description,
             title: title as string,
-            videoUrl: attachment?.proxyURL as string,
+            videoUrl: attachment?.proxyURL,
             map,
             nadeType
         })
@@ -90,7 +97,7 @@ export const execute = async (
         if (newNade) {
             await i.editReply({
                 content: `Se ha subido una nueva nade a Mylo Nades:`,
-                files: [attachment?.proxyURL as string]
+                files: [attachment?.proxyURL]
             })
         }
         if (!newNade && !exists) {
