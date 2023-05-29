@@ -253,6 +253,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
         } catch (e) {
             log('INFO', 'Antes del error')
             log('ERROR', e)
+            throw new InteractionFailedError()
         }
     }
     while (shouldContinue) {

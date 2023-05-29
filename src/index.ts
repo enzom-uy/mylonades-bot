@@ -1,9 +1,8 @@
-import { DiscordAPIError, Events } from 'discord.js'
+import { Events } from 'discord.js'
 
 import { client } from './config/client'
 import { BOT_TOKEN } from './config/envs'
 import './deploy-commands'
-import { deleteBotMessages } from './utils/bot/delete-bot-messages'
 import { log } from './utils/log'
 
 const sevenMinInMs = 420000
@@ -12,13 +11,20 @@ client.login(BOT_TOKEN)
 
 client.once(Events.ClientReady, async c => {
     log('SUCCESS', `Ready! Logged in as ${c.user.tag}.`)
+})
 
-    const channels = client.channels.cache.values()
-    setInterval(() => {
-        deleteBotMessages({ client, channels }).catch((e: DiscordAPIError) =>
-            log('ERROR', e.message)
-        )
-    }, sevenMinInMs)
+client.on('messageCreate', async message => {
+    const messageAuthorIsBot = client.user?.id === message.author.id
+
+    try {
+        if (messageAuthorIsBot) {
+            setTimeout(async () => {
+                await message.delete()
+            }, sevenMinInMs)
+        }
+    } catch (e) {
+        log('ERROR', e)
+    }
 })
 
 client.on(Events.InteractionCreate, async i => {
