@@ -7,6 +7,8 @@ import {
     TextChannel
 } from 'discord.js'
 
+import { log } from '../../utils/log'
+
 export const data = new SlashCommandBuilder()
     .setName('clear')
     .setDescription('Borra x cantidad de mensajes.')
@@ -21,6 +23,13 @@ export const execute = async (
     const messagesToDelete = i.options.getString('cantidad')
     const channel = i.channel
     if (channel instanceof TextChannel) {
-        return await channel.bulkDelete(Number(messagesToDelete))
+        try {
+            const messages = await channel.messages.fetch({ limit: Number(messagesToDelete) })
+            // Has to be greater than 1 because the "/clear" command messages counts as a message
+            if (messages.size > 1) await channel.bulkDelete(Number(messagesToDelete))
+        } catch (e) {
+            log('ERROR', e)
+        }
     }
+    return
 }

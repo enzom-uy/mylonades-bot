@@ -1,4 +1,4 @@
-import { Events } from 'discord.js'
+import { Events, TextChannel } from 'discord.js'
 
 import { client } from './config/client'
 import { BOT_TOKEN } from './config/envs'
@@ -17,9 +17,19 @@ client.on('messageCreate', async message => {
     const messageAuthorIsBot = client.user?.id === message.author.id
 
     try {
-        if (messageAuthorIsBot) {
+        if (messageAuthorIsBot && message) {
             setTimeout(async () => {
-                await message.delete()
+                const channel = message.channel
+                if (channel instanceof TextChannel) {
+                    // Get channel messages
+                    const fetchedMessages = await channel.messages.fetch()
+
+                    // Check if the message still exists
+                    if (fetchedMessages.has(message.id)) {
+                        // If the message exists, it can be deleted
+                        await message.delete()
+                    }
+                }
             }, sevenMinInMs)
         }
     } catch (e) {
