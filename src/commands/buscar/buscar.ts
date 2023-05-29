@@ -53,9 +53,14 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
 
     let currentPage = 1
     const pageSize = 6
-    let { currentNades, endIndex } = getPaginatedData(currentPage, pageSize, nades)
+    let { currentNades, endIndex } = getPaginatedData({
+        pageNumber: currentPage,
+        pageSize,
+        data: nades
+    })
 
     let shouldContinue = true
+    let userIsChoosingPage = true
 
     const handleShowNades = async (): Promise<void> => {
         // Create embed with all the nades and show them to the user.
@@ -70,27 +75,119 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
             endIndex
         })
 
-        const paginationArrows = await i.editReply({
+        const showNadesWithPagination = await i.editReply({
             embeds: [showFoundedNadesEmbed],
             components: [
                 paginationArrowsComponent as unknown as ActionRow<MessageActionRowComponent>
             ]
         })
 
-        try {
-            const paginationArrowsConfirmation = await paginationArrows.awaitMessageComponent({
-                filter: collectorFilter
-            })
-            if (!paginationArrowsConfirmation) {
-                log('ERROR', 'No hubo confirmación.')
-                return
-            }
-            const userClicked = paginationArrowsConfirmation.customId as CustomId
+        // Pagination handling
+        const handlePagination = async (): Promise<void> => {
+            try {
+                const paginationArrowsConfirmation =
+                    await showNadesWithPagination.awaitMessageComponent({
+                        filter: collectorFilter
+                    })
 
-            if (userClicked === 'left' && currentPage <= 1)
-                log('INFO', 'El usuario quiso ir a la izquierda pero ya está en la primera página.')
-        } catch (e) {
-            throw new InteractionFailedError()
+                const userClicked = paginationArrowsConfirmation.customId as CustomId
+
+                if (userClicked === 'right') {
+                    currentPage = currentPage + 1
+                    const { currentNades, endIndex } = getPaginatedData({
+                        pageNumber: currentPage,
+                        pageSize,
+                        data: nades
+                    })
+                    const { paginationArrowsComponent } = handlePaginationArrows({
+                        currentPage: currentPage + 1,
+                        endIndex
+                    })
+                    await paginationArrowsConfirmation.update({
+                        components: [
+                            paginationArrowsComponent as unknown as ActionRow<MessageActionRowComponent>
+                        ]
+                    })
+
+                    log(
+                        'INFO',
+                        'El usuario fue a la siguiente página. Estas son las granadas que deberían aparecer: ',
+                        currentNades
+                    )
+
+                    const showNadesWithPagination = await i.editReply({
+                        embeds: [
+                            embedWithNadesComponent({
+                                title: 'Granadas encontradas',
+                                author: 'Mylo',
+                                nades: currentNades
+                            })
+                        ],
+                        components: [
+                            paginationArrowsComponent as unknown as ActionRow<MessageActionRowComponent>
+                        ]
+                    })
+                    await showNadesWithPagination.awaitMessageComponent({
+                        filter: collectorFilter
+                    })
+                    await handlePagination()
+                }
+
+                if (userClicked === 'left') {
+                    currentPage = currentPage - 1
+                    const { currentNades, endIndex } = getPaginatedData({
+                        pageNumber: currentPage,
+                        pageSize,
+                        data: nades
+                    })
+                    const { paginationArrowsComponent } = handlePaginationArrows({
+                        currentPage: currentPage - 1,
+                        endIndex
+                    })
+                    await paginationArrowsConfirmation.update({
+                        components: [
+                            paginationArrowsComponent as unknown as ActionRow<MessageActionRowComponent>
+                        ]
+                    })
+
+                    log(
+                        'INFO',
+                        'El usuario fue a la anterior página. Estas son las granadas que deberían aparecer: ',
+                        currentNades
+                    )
+
+                    const showNadesWithPagination = await i.editReply({
+                        embeds: [
+                            embedWithNadesComponent({
+                                title: 'Granadas encontradas',
+                                author: 'Mylo',
+                                nades: currentNades
+                            })
+                        ],
+                        components: [
+                            paginationArrowsComponent as unknown as ActionRow<MessageActionRowComponent>
+                        ]
+                    })
+                    await showNadesWithPagination.awaitMessageComponent({
+                        filter: collectorFilter
+                    })
+                    await handlePagination()
+                }
+                if (userClicked === 'confirmPage') {
+                    userIsChoosingPage = false
+                    log('INFO', 'El usuario confirmó página.')
+                    await paginationArrowsConfirmation.update({
+                        components: [],
+                        embeds: [showFoundedNadesEmbed]
+                    })
+                }
+            } catch (e) {
+                log('INFO', 'Antes del error')
+                throw new InteractionFailedError()
+            }
+        }
+        while (userIsChoosingPage) {
+            await handlePagination()
         }
 
         const { row } = selectNadeMenuComponent(currentNades)
@@ -98,11 +195,10 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
             content: SELECT_MENU_CONTENT,
             components: [row]
         })
-
         try {
-            const userSelectConfirmation = userResponseSelectMenu.awaitMessageComponent({
+            const userSelectConfirmation = (await userResponseSelectMenu.awaitMessageComponent({
                 filter: collectorFilter
-            }) as unknown as DiscordComponentConfirmationResponse
+            })) as unknown as DiscordComponentConfirmationResponse
 
             // User chooses a nade from the Select Menu.
             if (userSelectConfirmation.customId === 'select') {
@@ -133,6 +229,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                 })) as unknown as DiscordComponentConfirmationResponse
 
                 if (buttonConfirmation.customId === 'cancel') {
+                    log('INFO', 'Canceló.')
                     shouldContinue = false
 
                     // Delete all messages cause user doesn't want to continue looking for nades.
@@ -141,17 +238,21 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                     await showButton.delete()
                     return
                 }
-                // Delete all messages but nade info because is the "root" message.
-                // I need it to edit it and start the interaction again.
-                await showButton.delete()
-                await nadeVideo.delete()
-                await userResponseSelectMenu.delete()
+                if (buttonConfirmation.customId === 'confirm') {
+                    log('INFO', 'Continúa.')
 
-                await handleShowNades()
+                    // Delete all messages but nade info because is the "root" message.
+                    // I need it to edit it and start the interaction again.
+                    // await nadeData.delete()
+                    await nadeVideo.delete()
+                    await showButton.delete()
+
+                    userIsChoosingPage = true
+                }
             }
-            return
         } catch (e) {
-            throw new InteractionFailedError()
+            log('INFO', 'Antes del error')
+            log('ERROR', e)
         }
     }
     while (shouldContinue) {

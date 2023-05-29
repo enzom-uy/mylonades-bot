@@ -1,8 +1,12 @@
-export const getPaginatedData = <T>(
-    pageNumber: number,
-    pageSize: number,
+export const getPaginatedData = <T>({
+    pageNumber,
+    pageSize,
+    data
+}: {
+    pageNumber: number
+    pageSize: number
     data: T[]
-): { currentNades: T[]; endIndex: number } => {
+}): { currentNades: T[]; endIndex: number } => {
     const startIndex = (pageNumber - 1) * pageSize
     const endIndex = startIndex + pageSize
     const currentNades = data.slice(startIndex, endIndex)

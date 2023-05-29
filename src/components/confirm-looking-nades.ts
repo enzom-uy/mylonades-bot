@@ -13,7 +13,7 @@ const confirmButton = new ButtonBuilder()
 
 const cancelButton = new ButtonBuilder()
     .setCustomId('cancel')
-    .setLabel('Cancel')
+    .setLabel('Cancelar')
     .setStyle(ButtonStyle.Secondary)
 export const confirmButtonRow = new ActionRowBuilder().addComponents(
     confirmButton,
