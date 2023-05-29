@@ -6,11 +6,17 @@ import {
     SlashCommandBuilder
 } from 'discord.js'
 
-import { confirmButtonRow } from '../../components/confirm-looking-nades'
+import {
+    confirmButtonRow,
+    ConfirmButtonsCustomIdOptions
+} from '../../components/confirm-looking-nades'
 import { embedResponseNadeComponent } from '../../components/embed-response-nade'
 import { embedWithNadesComponent } from '../../components/embed-with-nades'
 import { loadingEmbedComponent } from '../../components/loading-embed'
-import { CustomId, handlePaginationArrows } from '../../components/pagination-arrows'
+import {
+    handlePaginationArrows,
+    PaginationCustomIdOptions
+} from '../../components/pagination-arrows'
 import { SELECT_MENU_CONTENT, selectNadeMenuComponent } from '../../components/select-nade-menu'
 import { InteractionFailedError } from '../../errors/errors'
 import { DiscordComponentConfirmationResponse, Filter } from '../../types/commands/recientes'
@@ -90,7 +96,8 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                         filter: collectorFilter
                     })
 
-                const userClicked = paginationArrowsConfirmation.customId as CustomId
+                const userClicked =
+                    paginationArrowsConfirmation.customId as PaginationCustomIdOptions
 
                 if (userClicked === 'right') {
                     currentPage = currentPage + 1
@@ -228,7 +235,10 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                     filter: collectorFilter
                 })) as unknown as DiscordComponentConfirmationResponse
 
-                if (buttonConfirmation.customId === 'cancel') {
+                const buttonConfirmationCustomId =
+                    buttonConfirmation.customId as ConfirmButtonsCustomIdOptions
+
+                if (buttonConfirmationCustomId === 'cancel') {
                     log('INFO', 'Canceló.')
                     shouldContinue = false
 
@@ -238,7 +248,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                     await showButton.delete()
                     return
                 }
-                if (buttonConfirmation.customId === 'confirm') {
+                if (buttonConfirmationCustomId === 'confirm') {
                     log('INFO', 'Continúa.')
 
                     // Delete all messages but nade info because is the "root" message.

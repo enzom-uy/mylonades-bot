@@ -6,15 +6,24 @@ import {
     MessageActionRowComponent
 } from 'discord.js'
 
-const confirmButton = new ButtonBuilder()
-    .setCustomId('confirm')
-    .setLabel('Continuar')
-    .setStyle(ButtonStyle.Primary)
+import { buttonWithCustomIdValidation } from './pagination-arrows'
 
+export type ConfirmButtonsCustomIdOptions = 'cancel' | 'confirm'
+
+const confirmButton = new ButtonBuilder()
+
+buttonWithCustomIdValidation<ConfirmButtonsCustomIdOptions>({
+    style: ButtonStyle.Primary,
+    customId: 'confirm',
+    button: confirmButton
+})
 const cancelButton = new ButtonBuilder()
-    .setCustomId('cancel')
-    .setLabel('Cancelar')
-    .setStyle(ButtonStyle.Secondary)
+
+buttonWithCustomIdValidation<ConfirmButtonsCustomIdOptions>({
+    style: ButtonStyle.Secondary,
+    customId: 'cancel',
+    button: cancelButton
+})
 export const confirmButtonRow = new ActionRowBuilder().addComponents(
     confirmButton,
     cancelButton
