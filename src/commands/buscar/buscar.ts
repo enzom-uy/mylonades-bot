@@ -226,36 +226,36 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                 const nadeVideo = await i.followUp({ files: [selectedNade.video_url] })
                 await nadeData.edit({ embeds: [embedResponse] })
 
-                const showButton = await i.followUp({
+                const continueButton = await i.followUp({
                     content: `¿Quieres volver a ver las granadas?`,
                     components: [confirmButtonRow]
                 })
 
-                const buttonConfirmation = (await showButton.awaitMessageComponent({
+                const continueButtonConfirmation = (await continueButton.awaitMessageComponent({
                     filter: collectorFilter
                 })) as unknown as DiscordComponentConfirmationResponse
 
-                const buttonConfirmationCustomId =
-                    buttonConfirmation.customId as ConfirmButtonsCustomIdOptions
+                const continueCustomId =
+                    continueButtonConfirmation.customId as ConfirmButtonsCustomIdOptions
 
-                if (buttonConfirmationCustomId === 'cancel') {
+                if (continueCustomId === 'cancel') {
                     log('INFO', 'Canceló.')
                     shouldContinue = false
 
                     // Delete all messages cause user doesn't want to continue looking for nades.
                     await nadeData.delete()
                     await nadeVideo.delete()
-                    await showButton.delete()
+                    await continueButton.delete()
                     return
                 }
-                if (buttonConfirmationCustomId === 'confirm') {
+                if (continueCustomId === 'confirm') {
                     log('INFO', 'Continúa.')
 
                     // Delete all messages but nade info because is the "root" message.
                     // I need it to edit it and start the interaction again.
                     // await nadeData.delete()
                     await nadeVideo.delete()
-                    await showButton.delete()
+                    await continueButton.delete()
 
                     userIsChoosingPage = true
                 }
