@@ -16,7 +16,7 @@ buttonWithCustomIdValidation<ConfirmButtonsCustomIdOptions>({
     style: ButtonStyle.Primary,
     customId: 'confirm',
     button: confirmButton,
-    label: 'Continuar'
+    label: 'Sí'
 })
 const cancelButton = new ButtonBuilder()
 
@@ -24,7 +24,7 @@ buttonWithCustomIdValidation<ConfirmButtonsCustomIdOptions>({
     style: ButtonStyle.Secondary,
     customId: 'cancel',
     button: cancelButton,
-    label: 'Cancelar'
+    label: 'No'
 })
 export const confirmButtonRow = new ActionRowBuilder().addComponents(
     confirmButton,

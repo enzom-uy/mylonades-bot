@@ -30,10 +30,11 @@ export const buttonWithCustomIdValidation = <T extends string>({
 
 export const handlePaginationArrows = ({
     currentPage,
-    endIndex
+    totalPages
 }: {
     currentPage: number
     endIndex: number
+    totalPages: number
 }): { paginationArrowsComponent: ActionRowBuilder } => {
     const leftArrowButton = new ButtonBuilder()
     buttonWithCustomIdValidation({
@@ -49,7 +50,7 @@ export const handlePaginationArrows = ({
         customId: 'right',
         emoji: '➡️',
         style: ButtonStyle.Secondary,
-        disabled: currentPage === endIndex && true
+        disabled: currentPage === totalPages && true
     })
     const confirmPageButton = new ButtonBuilder()
     buttonWithCustomIdValidation({

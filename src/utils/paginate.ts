@@ -6,9 +6,10 @@ export const getPaginatedData = <T>({
     pageNumber: number
     pageSize: number
     data: T[]
-}): { currentNades: T[]; endIndex: number } => {
+}): { currentNades: T[]; endIndex: number; totalPages: number } => {
     const startIndex = (pageNumber - 1) * pageSize
     const endIndex = startIndex + pageSize
     const currentNades = data.slice(startIndex, endIndex)
-    return { currentNades, endIndex }
+    const totalPages = Math.ceil(data.length / pageSize)
+    return { currentNades, endIndex, totalPages }
 }

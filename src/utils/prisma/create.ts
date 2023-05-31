@@ -2,7 +2,6 @@ import { Nade } from '@prisma/client'
 import { User } from 'discord.js'
 
 import { prisma } from '../../config/database'
-import { log } from '../log'
 
 interface Args {
     videoUrl: string
@@ -32,7 +31,6 @@ export const prismaCreateNade = async ({
             }
         }
     })
-    log('INFO', exists)
     if (exists.length > 0) {
         const message = 'Ya hay una granada registrada con el mismo nombre de archivo.'
         return { message, exists }
