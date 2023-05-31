@@ -5,6 +5,8 @@ import {
     SlashCommandBuilder
 } from 'discord.js'
 
+import { embedResponseNadeComponent } from '../../components/embed-response-nade'
+import { loadingEmbedComponent } from '../../components/loading-embed'
 import { validateInputs } from '../../schemas/commands/crear'
 import { StringOptions } from '../../types/commands/crear'
 import { handleMapAndNadeTypeAutocomplete } from '../../utils/commands/handle-autocomplete'
@@ -87,6 +89,7 @@ export const execute = async (
             map,
             nadeType
         })
+
         if (exists && exists.length > 0) {
             await i.editReply({
                 content: message,
@@ -95,9 +98,15 @@ export const execute = async (
             return
         }
         if (newNade) {
-            await i.editReply({
+            const successMessage = await i.editReply({
                 content: `Se ha subido una nueva nade a Mylo Nades:`,
+                embeds: [loadingEmbedComponent('Cargando granada...')]
+            })
+            await i.followUp({
                 files: [attachment?.proxyURL]
+            })
+            await successMessage.edit({
+                embeds: [embedResponseNadeComponent(newNade)]
             })
         }
         if (!newNade && !exists) {

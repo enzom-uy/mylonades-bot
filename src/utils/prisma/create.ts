@@ -1,6 +1,7 @@
 import { Nade } from '@prisma/client'
 import { User } from 'discord.js'
 
+import { NadeWithAuthorAndMap } from './find'
 import { prisma } from '../../config/database'
 
 interface Args {
@@ -21,7 +22,7 @@ export const prismaCreateNade = async ({
     nadeType
 }: Args): Promise<
     | { message: string; exists: Nade[]; newNade?: undefined }
-    | { newNade: Nade; message?: undefined; exists?: undefined }
+    | { newNade: NadeWithAuthorAndMap; message?: undefined; exists?: undefined }
 > => {
     const filename = videoUrl.split('/').slice(-1)[0]
     const exists = await prisma.nade.findMany({
@@ -60,6 +61,18 @@ export const prismaCreateNade = async ({
             nadeType: {
                 connect: {
                     name: nadeType
+                }
+            }
+        },
+        include: {
+            map: {
+                select: {
+                    name: true
+                }
+            },
+            author: {
+                select: {
+                    name: true
                 }
             }
         }
