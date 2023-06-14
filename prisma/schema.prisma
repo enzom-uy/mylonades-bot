@@ -8,43 +8,83 @@ datasource db {
   relationMode = "prisma"
 }
 
-model Nade {
-  id           String   @id @default(uuid())
-  description  String?  @db.Text
-  map_id       String
-  status       Status   @default(PENDING)
-  author_id    String
-  video_url    String   @unique
-  title        String   @db.Text
-  map          Map      @relation(fields: [map_id], references: [name])
-  author       User     @relation(fields: [author_id], references: [discord_tag])
-  createdAt    DateTime @default(now())
-  nadeType     NadeType @relation(fields: [nadeTypeName], references: [name])
-  nadeTypeName String
+model Account {
+  id                String  @id
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
-  @@index([map_id])
-  @@index([author_id])
-  @@index([nadeTypeName])
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Map {
-  name  String @id
-  nades Nade[]
+  name String @id
+}
+
+model Nade {
+  id           String      @id
+  description  String?     @db.Text
+  map_id       String
+  status       Nade_status @default(PENDING)
+  author_id    String
+  video_url    String      @unique
+  title        String      @db.Text
+  nadeTypeName String
+  createdAt    DateTime    @default(now())
+  serverId     String?
+  userId       String
+
+  @@index([author_id])
+  @@index([map_id])
+  @@index([nadeTypeName])
+  @@index([serverId])
+  @@index([userId])
 }
 
 model NadeType {
-  name  String @id
-  nades Nade[]
+  name String @id
+}
+
+model Server {
+  id   String @id
+  name String
+}
+
+model Session {
+  id           String   @id
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  @@index([userId])
 }
 
 model User {
-  id          String @id @default(uuid())
-  name        String @unique
-  discord_tag String @unique
-  nades       Nade[]
+  id            String    @id
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
 }
 
-enum Status {
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum Nade_status {
   APPROVED
   PENDING
   DECLINED
