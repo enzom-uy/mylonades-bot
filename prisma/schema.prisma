@@ -21,13 +21,10 @@ model Nade {
   createdAt    DateTime @default(now())
   nadeType     NadeType @relation(fields: [nadeTypeName], references: [name])
   nadeTypeName String
-  Server       Server?  @relation(fields: [serverId], references: [id])
-  serverId     String?
 
   @@index([map_id])
   @@index([author_id])
   @@index([nadeTypeName])
-  @@index([serverId])
 }
 
 model Map {
@@ -41,25 +38,10 @@ model NadeType {
 }
 
 model User {
-  id             String  @id @default(uuid())
-  name           String  @unique
-  discord_tag    String  @unique
-  nades          Nade[]
-  ServerAdmin    Server? @relation(fields: [serverAdminId], references: [id], name: "admin")
-  ServerMember   Server? @relation(fields: [serverMemberId], references: [id], name: "members")
-  serverAdminId  String?
-  serverMemberId String?
-
-  @@index([serverAdminId])
-  @@index([serverMemberId])
-}
-
-model Server {
-  id      String @id
-  name    String
-  admin   User[] @relation(name: "admin")
-  members User[] @relation(name: "members")
-  nades   Nade[]
+  id          String @id @default(uuid())
+  name        String @unique
+  discord_tag String @unique
+  nades       Nade[]
 }
 
 enum Status {

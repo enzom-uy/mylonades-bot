@@ -54,3 +54,8 @@ for (const folder of commandsFolder) {
         log('ERROR', error)
     }
 })()
+
+/* rest */
+/*   .delete(Routes.applicationGuildCommand(APP_ID, GUILD_ID, '1100512417596854432')) */
+/*   .then(() => log('SUCCESS', 'Successfully deleted application command "/ping".')) */
+/*   .catch(e => log('ERROR', e)) */
