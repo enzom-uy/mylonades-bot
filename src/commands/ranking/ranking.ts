@@ -11,7 +11,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<any> => {
     await i.deferReply()
     const { topUsers } = await getUsersRanking()
     const onlyTopFive = topUsers.slice(0, 5)
-    const isUserInTopFive = onlyTopFive.filter(user => user.discord_tag === i.user.tag)
+    const isUserInTopFive = onlyTopFive.filter(user => user.name === i.user.username)
     const userIsNotInTopFive = isUserInTopFive.length === 0
 
     const rankedNames = onlyTopFive.map((name, index) => `${index + 1}. ${name.name}`)
@@ -24,7 +24,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<any> => {
         .setTimestamp()
 
     if (userIsNotInTopFive) {
-        const userPositionInRanking = topUsers.findIndex(user => user.discord_tag === i.user.tag)
+        const userPositionInRanking = topUsers.findIndex(user => user.name === i.user.tag)
         embed.addFields({ name: '\u200B', value: '\u200B' })
         embed.addFields({ name: 'Tu posición', value: `${userPositionInRanking}`, inline: true })
     }

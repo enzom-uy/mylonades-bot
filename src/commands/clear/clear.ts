@@ -1,6 +1,7 @@
 import {
     ChatInputCommandInteraction,
     Collection,
+    DiscordAPIError,
     Message,
     PartialMessage,
     SlashCommandBuilder,
@@ -8,6 +9,8 @@ import {
 } from 'discord.js'
 
 import { log } from '../../utils/log'
+
+const messageTooOldErrorCode = 50034
 
 export const data = new SlashCommandBuilder()
     .setName('clear')
@@ -28,7 +31,12 @@ export const execute = async (
             // Has to be greater than 1 because the "/clear" command messages counts as a message
             if (messages.size > 1) await channel.bulkDelete(Number(messagesToDelete))
         } catch (e) {
-            log('ERROR', e)
+            const error = e as DiscordAPIError
+            if (error.code === messageTooOldErrorCode) {
+                await i.editReply('Solo se pueden eliminar mensajes de los últimos 14 días.')
+                return
+            }
+            log('ERROR', error)
         }
     }
     return

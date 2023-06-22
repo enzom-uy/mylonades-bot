@@ -16,8 +16,8 @@ export const data = new SlashCommandBuilder()
 export const execute = async (i: ChatInputCommandInteraction): Promise<void> => {
     await i.deferReply()
 
-    const { lastFiveNades } = await getLastFiveNades()
-    if (lastFiveNades.length === 0) {
+    const { lastFiveNades } = await getLastFiveNades({ serverId: i.guildId as string })
+    if (lastFiveNades.length <= 0) {
         await i.editReply('Todavía no se ha creado ninguna granada.')
         return
     }
@@ -55,7 +55,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                 .addFields(
                     { name: 'Título', value: selectedNade.title, inline: true },
                     { name: 'Mapa', value: selectedNade.map.name, inline: true },
-                    { name: 'Tipo', value: selectedNade.nadeTypeName, inline: true },
+                    { name: 'Tipo', value: selectedNade.nade_type_name, inline: true },
                     { name: 'Autor', value: selectedNade.author.name, inline: true }
                 )
                 .setTimestamp()

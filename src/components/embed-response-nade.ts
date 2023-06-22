@@ -12,7 +12,7 @@ export const embedResponseNadeComponent = (nade: NadeWithAuthorAndMap): EmbedBui
         .addFields(
             { name: 'Título', value: nade.title, inline: true },
             { name: 'Mapa', value: nade.map.name, inline: true },
-            { name: 'Tipo', value: nade.nadeTypeName, inline: true },
+            { name: 'Tipo', value: nade.nade_type_name, inline: true },
             { name: 'Autor', value: nade.author.name, inline: true }
         )
 }

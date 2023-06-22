@@ -1,5 +1,4 @@
 import { Nade } from '@prisma/client'
-import { User } from 'discord.js'
 
 import { NadeWithAuthorAndMap } from './find'
 import { prisma } from '../../config/database'
@@ -8,18 +7,20 @@ interface Args {
     videoUrl: string
     title: string
     description?: string | null
-    user: User
     map: string
     nadeType: string
+    userId: string
+    serverId: string
 }
 
 export const prismaCreateNade = async ({
     description,
     videoUrl,
-    user,
     title,
     map,
-    nadeType
+    nadeType,
+    userId,
+    serverId
 }: Args): Promise<
     | { message: string; exists: Nade[]; newNade?: undefined }
     | { newNade: NadeWithAuthorAndMap; message?: undefined; exists?: undefined }
@@ -41,26 +42,25 @@ export const prismaCreateNade = async ({
             title: title,
             description: description ? description : null,
             status: 'PENDING',
-            author: {
-                connectOrCreate: {
-                    where: {
-                        discord_tag: user.tag
-                    },
-                    create: {
-                        discord_tag: user.tag,
-                        name: user.username
-                    }
-                }
-            },
             video_url: videoUrl,
             map: {
                 connect: {
                     name: map
                 }
             },
-            nadeType: {
+            nade_type: {
                 connect: {
                     name: nadeType
+                }
+            },
+            author: {
+                connect: {
+                    id: userId
+                }
+            },
+            Server: {
+                connect: {
+                    id: serverId
                 }
             }
         },

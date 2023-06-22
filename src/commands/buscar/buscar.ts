@@ -55,7 +55,13 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
     const nadeType = i.options.getString('tipo')
     const collectorFilter: Filter = (interaction): boolean => interaction.user.id === i.user.id
 
-    const { nades } = await getNades({ query, map, nadeType })
+    const { nades } = await getNades({ query, map, nadeType, serverId: i.guildId as string })
+    if (nades.length <= 0) {
+        await i.editReply({
+            content: 'No se han encontrado granadas.'
+        })
+        return
+    }
 
     let currentPage = 1
     const pageSize = 6

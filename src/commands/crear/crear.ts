@@ -7,10 +7,12 @@ import {
 
 import { embedResponseNadeComponent } from '../../components/embed-response-nade'
 import { loadingEmbedComponent } from '../../components/loading-embed'
+import { prisma } from '../../config/database'
 import { validateInputs } from '../../schemas/commands/crear'
 import { StringOptions } from '../../types/commands/crear'
 import { handleMapAndNadeTypeAutocomplete } from '../../utils/commands/handle-autocomplete'
 import { compareRequired } from '../../utils/commands/sort-required-first'
+import { checkIfuserExists } from '../../utils/prisma/check-if-user-exists'
 import { prismaCreateNade } from '../../utils/prisma/create'
 
 const stringOptions: StringOptions[] = [
@@ -58,6 +60,13 @@ export const execute = async (
     i: ChatInputCommandInteraction
 ): Promise<Message<boolean> | undefined> => {
     await i.deferReply()
+    const userExists = await checkIfuserExists({ userId: i.user.id })
+    if (!userExists) {
+        await i.editReply({
+            content: 'Parece que no has iniciado sesión en la página.'
+        })
+        return
+    }
     const title = i.options.getString('título')
     const description = i.options.getString('descripción')
     const nadeType = i.options.getString('tipo') as string
@@ -70,6 +79,17 @@ export const execute = async (
         })
         return
     }
+    const serverExists = await prisma.server.findFirst({
+        where: {
+            id: i.guildId as string
+        }
+    })
+
+    if (!serverExists) {
+        await i.editReply('El servidor no existe. Créalo por medio de la página <link>.')
+        return
+    }
+    console.log(serverExists)
 
     const { success, errorMessage } = validateInputs({
         título: title as string,
@@ -77,43 +97,44 @@ export const execute = async (
         videoUrl: attachment.proxyURL
     })
 
-    if (success === false && errorMessage && errorMessage.length > 0) {
+    if (success === false) {
         await i.editReply(String(errorMessage))
+        return
     }
-    if (success) {
-        const { newNade, message, exists } = await prismaCreateNade({
-            user: i.user,
-            description: description && description,
-            title: title as string,
-            videoUrl: attachment?.proxyURL,
-            map,
-            nadeType
-        })
 
-        if (exists && exists.length > 0) {
-            await i.editReply({
-                content: message,
-                files: [exists[0].video_url]
-            })
-            return
-        }
-        if (newNade) {
-            const successMessage = await i.editReply({
-                content: `Se ha subido una nueva nade a Mylo Nades:`,
-                embeds: [loadingEmbedComponent('Cargando granada...')]
-            })
-            await i.followUp({
-                files: [attachment?.proxyURL]
-            })
-            await successMessage.edit({
-                embeds: [embedResponseNadeComponent(newNade)]
-            })
-        }
-        if (!newNade && !exists) {
-            await i.editReply(
-                'Ocurrió un error intentando subir la granada. Por favor inténtelo nuevamente.'
-            )
-        }
+    const { newNade, message, exists } = await prismaCreateNade({
+        description: description && description,
+        title: title as string,
+        videoUrl: attachment?.proxyURL,
+        map,
+        nadeType,
+        userId: i.user.id,
+        serverId: i.guildId as string
+    })
+
+    if (exists && exists.length > 0) {
+        await i.editReply({
+            content: message,
+            files: [exists[0].video_url]
+        })
+        return
+    }
+    if (newNade) {
+        const successMessage = await i.editReply({
+            content: `Se ha subido una nueva nade a Mylo Nades:`,
+            embeds: [loadingEmbedComponent('Cargando granada...')]
+        })
+        await i.followUp({
+            files: [attachment?.proxyURL]
+        })
+        await successMessage.edit({
+            embeds: [embedResponseNadeComponent(newNade)]
+        })
+    }
+    if (!newNade && !exists) {
+        await i.editReply(
+            'Ocurrió un error intentando subir la granada. Por favor inténtelo nuevamente.'
+        )
     }
     return
 }

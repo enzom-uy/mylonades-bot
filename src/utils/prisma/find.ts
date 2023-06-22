@@ -14,22 +14,27 @@ export interface NadeWithAuthorAndMap extends Nade {
     }
 }
 
-export const getLastFiveNades = async (): Promise<{ lastFiveNades: NadeWithAuthorAndMap[] }> => {
+export const getLastFiveNades = async ({
+    serverId
+}: {
+    serverId: string
+}): Promise<{ lastFiveNades: NadeWithAuthorAndMap[] }> => {
     const lastFiveNades = await prisma.nade.findMany({
         orderBy: {
-            createdAt: 'desc'
+            created_at: 'desc'
         },
         take: 5,
         where: {
-            status: 'APPROVED'
+            status: 'APPROVED',
+            server_id: serverId
         },
         include: {
-            author: {
+            map: {
                 select: {
                     name: true
                 }
             },
-            map: {
+            author: {
                 select: {
                     name: true
                 }
@@ -43,14 +48,17 @@ export const getLastFiveNades = async (): Promise<{ lastFiveNades: NadeWithAutho
 export const getNades = async ({
     query,
     map,
-    nadeType
+    nadeType,
+    serverId
 }: {
     query?: string | null
     map?: string | null
     nadeType?: string | null
+    serverId: string
 }): Promise<{ nades: NadeWithAuthorAndMap[] }> => {
     const nades = await prisma.nade.findMany({
         where: {
+            server_id: serverId,
             OR: [
                 {
                     title: query ? { contains: query } : undefined
@@ -60,7 +68,7 @@ export const getNades = async ({
                 }
             ],
             map: map ? { name: map } : undefined,
-            nadeTypeName: nadeType ? nadeType : undefined
+            nade_type_name: nadeType ? nadeType : undefined
         },
         include: {
             author: {
