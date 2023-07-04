@@ -1,169 +1,167 @@
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider     = "mysql"
-  url          = env("DATABASE_URL")
-  relationMode = "prisma"
+    provider     = "mysql"
+    url          = env("DATABASE_URL")
+    relationMode = "prisma"
 }
 
 model NadeType {
-  name  String @id
-  nades Nade[]
+    name  String @id
+    nades Nade[]
 }
 
 model Map {
-  name  String @id
-  nades Nade[]
+    name  String @id
+    nades Nade[]
 }
 
 model Nade {
-  id             String      @id @default(cuid())
-  description    String?     @db.Text
-  status         Nade_status @default(PENDING)
-  video_url      String      @unique
-  title          String      @db.Text
-  created_at     DateTime    @default(now())
-  nade_type_name String
-  map_name       String
-  user_id        String
-  server_id      String?
-  serverId       String?
-  author         User        @relation(fields: [user_id], references: [id])
-  map            Map         @relation(fields: [map_name], references: [name])
-  nade_type      NadeType    @relation(fields: [nade_type_name], references: [name])
-  Server         Server?     @relation(fields: [serverId], references: [id])
+    id             String      @id @default(cuid())
+    description    String?     @db.Text
+    status         Nade_status @default(PENDING)
+    video_url      String      @unique
+    title          String      @db.Text
+    created_at     DateTime    @default(now())
+    nade_type_name String
+    map_name       String
+    user_id        String
+    server_id      String?
+    author         User        @relation(fields: [user_id], references: [id])
+    map            Map         @relation(fields: [map_name], references: [name])
+    nade_type      NadeType    @relation(fields: [nade_type_name], references: [name])
+    Server         Server?     @relation(fields: [server_id], references: [id])
 
-  @@index([nade_type_name])
-  @@index([map_name])
-  @@index([user_id])
-  @@index([server_id])
-  @@index([serverId])
+    @@index([nade_type_name])
+    @@index([map_name])
+    @@index([user_id])
+    @@index([server_id])
 }
 
 model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    id                String  @id @default(cuid())
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String? @db.Text
+    session_state     String?
+    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  @@unique([provider, providerAccountId])
-  @@index([userId])
+    @@unique([provider, providerAccountId])
+    @@index([userId])
 }
 
 model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id           String   @id @default(cuid())
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
+    @@index([userId])
 }
 
 model Server {
-  id             String           @id
-  name           String
-  description    String?          @db.Text
-  members        User[]           @relation("ServerMembers")
-  admins         User[]
-  UserServerRole UserServerRole[]
-  nades          Nade[]
+    id             String           @id
+    name           String
+    description    String?          @db.Text
+    members        User[]           @relation("ServerMembers")
+    admins         User[]
+    UserServerRole UserServerRole[]
+    nades          Nade[]
 }
 
 model ServerRole {
-  name  Server_Role @id
-  users User[]
+    name  Server_Role @id
+    users User[]
 }
 
 model UserServerRole {
-  id        String      @id @default(cuid())
-  user_id   String
-  server_id String
-  role      Server_Role
-  user      User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  server    Server      @relation(fields: [server_id], references: [id], onDelete: Cascade)
+    id        String      @id @default(cuid())
+    user_id   String
+    server_id String
+    role      Server_Role
+    user      User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+    server    Server      @relation(fields: [server_id], references: [id], onDelete: Cascade)
 
-  @@index([user_id])
-  @@index([server_id])
+    @@index([user_id])
+    @@index([server_id])
 }
 
 model User {
-  id                String           @id @default(cuid())
-  name              String
-  email             String?          @unique
-  emailVerified     DateTime?
-  image             String?
-  accounts          Account[]
-  sessions          Session[]
-  nades             Nade[]
-  servers_is_member Server[]         @relation("ServerMembers")
-  servers_is_admin  Server[]
-  roles             ServerRole[]
-  user_server_role  UserServerRole[]
+    id                String           @id @default(cuid())
+    name              String
+    email             String?          @unique
+    emailVerified     DateTime?
+    image             String?
+    accounts          Account[]
+    sessions          Session[]
+    nades             Nade[]
+    servers_is_member Server[]         @relation("ServerMembers")
+    servers_is_admin  Server[]
+    roles             ServerRole[]
+    user_server_role  UserServerRole[]
 }
 
 model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
+    identifier String
+    token      String   @unique
+    expires    DateTime
 
-  @@unique([identifier, token])
+    @@unique([identifier, token])
 }
 
 model ServerMembers {
-  A String
-  B String
+    A String
+    B String
 
-  @@unique([A, B], map: "_ServerMembers_AB_unique")
-  @@index([B], map: "_ServerMembers_B_index")
-  @@map("_ServerMembers")
+    @@unique([A, B], map: "_ServerMembers_AB_unique")
+    @@index([B], map: "_ServerMembers_B_index")
+    @@map("_ServerMembers")
 }
 
 model ServerRoleToUser {
-  A ServerRoleToUser_A
-  B String
+    A ServerRoleToUser_A
+    B String
 
-  @@unique([A, B], map: "_ServerRoleToUser_AB_unique")
-  @@index([B], map: "_ServerRoleToUser_B_index")
-  @@map("_ServerRoleToUser")
+    @@unique([A, B], map: "_ServerRoleToUser_AB_unique")
+    @@index([B], map: "_ServerRoleToUser_B_index")
+    @@map("_ServerRoleToUser")
 }
 
 model ServerToUser {
-  A String
-  B String
+    A String
+    B String
 
-  @@unique([A, B], map: "_ServerToUser_AB_unique")
-  @@index([B], map: "_ServerToUser_B_index")
-  @@map("_ServerToUser")
+    @@unique([A, B], map: "_ServerToUser_AB_unique")
+    @@index([B], map: "_ServerToUser_B_index")
+    @@map("_ServerToUser")
 }
 
 enum Nade_status {
-  APPROVED
-  PENDING
-  DECLINED
+    APPROVED
+    PENDING
+    DECLINED
 }
 
 enum Server_Role {
-  OWNER
-  ADMIN
-  USER
+    OWNER
+    ADMIN
+    USER
 }
 
 enum ServerRoleToUser_A {
-  OWNER
-  ADMIN
-  USER
+    OWNER
+    ADMIN
+    USER
 
-  @@map("_ServerRoleToUser_A")
+    @@map("_ServerRoleToUser_A")
 }
