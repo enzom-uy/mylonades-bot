@@ -61,6 +61,7 @@ export const execute = async (
 ): Promise<Message<boolean> | undefined> => {
     await i.deferReply()
     const userExists = await checkIfUserExist({ userId: i.user.id })
+    console.log(userExists)
     if (!userExists) {
         await i.editReply({
             content: 'Parece que no has iniciado sesión en la página.'
