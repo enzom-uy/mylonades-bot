@@ -12,7 +12,7 @@ import { validateInputs } from '../../schemas/commands/crear'
 import { StringOptions } from '../../types/commands/crear'
 import { handleMapAndNadeTypeAutocomplete } from '../../utils/commands/handle-autocomplete'
 import { compareRequired } from '../../utils/commands/sort-required-first'
-import { checkIfuserExists } from '../../utils/prisma/check-if-user-exists'
+import { checkIfUserExist } from '../../utils/prisma/check-if-user-exists'
 import { prismaCreateNade } from '../../utils/prisma/create'
 
 const stringOptions: StringOptions[] = [
@@ -60,7 +60,7 @@ export const execute = async (
     i: ChatInputCommandInteraction
 ): Promise<Message<boolean> | undefined> => {
     await i.deferReply()
-    const userExists = await checkIfuserExists({ userId: i.user.id })
+    const userExists = await checkIfUserExist({ userId: i.user.id })
     if (!userExists) {
         await i.editReply({
             content: 'Parece que no has iniciado sesión en la página.'
