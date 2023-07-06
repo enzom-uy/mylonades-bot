@@ -40,43 +40,31 @@ model Nade {
     @@index([server_id])
 }
 
-model Account {
-    id                String  @id @default(cuid())
-    userId            String
-    type              String
-    provider          String
-    providerAccountId String
-    refresh_token     String? @db.Text
-    access_token      String? @db.Text
-    expires_at        Int?
-    token_type        String?
-    scope             String?
-    id_token          String? @db.Text
-    session_state     String?
-    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+model Report {
+    id                 String      @id @default(cuid())
+    author             User        @relation(fields: [author_id], references: [id])
+    author_id          String
+    type               Report_Type
+    reported_user      User?       @relation(fields: [reported_user_id], references: [id], name: "ReportsReceived")
+    reported_user_id   String?
+    reported_server    Server?     @relation(fields: [reported_server_id], references: [id])
+    reported_server_id String?
 
-    @@unique([provider, providerAccountId])
-    @@index([userId])
-}
-
-model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    @@index([userId])
+    @@index([author_id])
+    @@index([reported_user_id])
+    @@index([reported_server_id])
 }
 
 model Server {
-    id             String           @id
-    name           String
-    description    String?          @db.Text
-    members        User[]           @relation("ServerMembers")
-    admins         User[]
-    UserServerRole UserServerRole[]
-    nades          Nade[]
+    id               String           @id
+    name             String
+    description      String?          @db.Text
+    server_icon      String?
+    members          User[]           @relation("ServerMembers")
+    admins           User[]
+    UserServerRole   UserServerRole[]
+    nades            Nade[]
+    reports_received Report[]
 }
 
 model ServerRole {
@@ -109,6 +97,37 @@ model User {
     servers_is_admin  Server[]
     roles             ServerRole[]
     user_server_role  UserServerRole[]
+    reports_made      Report[]
+    reports_received  Report[]         @relation("ReportsReceived")
+}
+
+model Account {
+    id                String  @id @default(cuid())
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String? @db.Text
+    session_state     String?
+    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+    @@unique([provider, providerAccountId])
+    @@index([userId])
+}
+
+model Session {
+    id           String   @id @default(cuid())
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
 }
 
 model VerificationToken {
@@ -119,37 +138,9 @@ model VerificationToken {
     @@unique([identifier, token])
 }
 
-model ServerMembers {
-    A String
-    B String
-
-    @@unique([A, B], map: "_ServerMembers_AB_unique")
-    @@index([B], map: "_ServerMembers_B_index")
-    @@map("_ServerMembers")
-}
-
-model ServerRoleToUser {
-    A ServerRoleToUser_A
-    B String
-
-    @@unique([A, B], map: "_ServerRoleToUser_AB_unique")
-    @@index([B], map: "_ServerRoleToUser_B_index")
-    @@map("_ServerRoleToUser")
-}
-
-model ServerToUser {
-    A String
-    B String
-
-    @@unique([A, B], map: "_ServerToUser_AB_unique")
-    @@index([B], map: "_ServerToUser_B_index")
-    @@map("_ServerToUser")
-}
-
 enum Nade_status {
     APPROVED
     PENDING
-    DECLINED
 }
 
 enum Server_Role {
@@ -158,10 +149,8 @@ enum Server_Role {
     USER
 }
 
-enum ServerRoleToUser_A {
-    OWNER
-    ADMIN
+enum Report_Type {
     USER
-
-    @@map("_ServerRoleToUser_A")
+    NADE
+    SERVER
 }
