@@ -2,6 +2,7 @@ import {
     ActionRow,
     AutocompleteInteraction,
     ChatInputCommandInteraction,
+    LocaleString,
     MessageActionRowComponent,
     SlashCommandBuilder
 } from 'discord.js'
@@ -17,7 +18,7 @@ import {
     handlePaginationArrows,
     PaginationCustomIdOptions
 } from '../../components/pagination-arrows'
-import { SELECT_MENU_CONTENT, selectNadeMenuComponent } from '../../components/select-nade-menu'
+import { selectNadeMenuComponent } from '../../components/select-nade-menu'
 import { InteractionFailedError } from '../../errors/errors'
 import { DiscordComponentConfirmationResponse, Filter } from '../../types/commands/recientes'
 import { handleMapAndNadeTypeAutocomplete } from '../../utils/commands/handle-autocomplete'
@@ -26,21 +27,24 @@ import { getPaginatedData } from '../../utils/paginate'
 import { getNades } from '../../utils/prisma/find'
 
 export const data = new SlashCommandBuilder()
-    .setName('buscar')
-    .setDescription('Busca una granada en base a ciertas preferencias.')
+    .setName('search')
+    .setNameLocalizations({
+        'es-ES': 'buscar'
+    })
+    .setDescription('Search for a nade based on your query.')
+    .setDescriptionLocalizations({
+        'es-ES': 'Buscar granadas según tu query.'
+    })
 
 data.addStringOption(option =>
     option
         .setName('query')
         .setDescription(
-            'Texto relacionado a la granada. Puede ser una parte del título o descripción.'
+            'Text related to the nade. Can be part of the title, description, map, nade type or author.'
         )
-)
-data.addStringOption(o =>
-    o.setName('mapa').setDescription('Nombre del mapa.').setAutocomplete(true)
-)
-data.addStringOption(o =>
-    o.setName('tipo').setDescription('Tipo de la granada.').setAutocomplete(true)
+        .setDescriptionLocalizations({
+            'es-ES': 'Texto relacionado a la granada. Puede ser parte del título, descripción, mapa, tipo o autor.'
+        })
 )
 
 export const autocomplete = async (i: AutocompleteInteraction): Promise<void> => {
@@ -50,15 +54,15 @@ export const autocomplete = async (i: AutocompleteInteraction): Promise<void> =>
 export const execute = async (i: ChatInputCommandInteraction): Promise<void> => {
     await i.deferReply()
 
+    const locale: LocaleString = i.locale
+    const isSpanish = locale === 'es-ES'
     const query = i.options.getString('query')
-    const map = i.options.getString('mapa')
-    const nadeType = i.options.getString('tipo')
     const collectorFilter: Filter = (interaction): boolean => interaction.user.id === i.user.id
 
-    const { nades } = await getNades({ query, map, nadeType, serverId: i.guildId as string })
+    const { nades } = await getNades({ query, serverId: i.guildId as string })
     if (nades.length <= 0) {
         await i.editReply({
-            content: 'No se han encontrado granadas.'
+            content: isSpanish ? 'No se han encontrado granadas.' : 'No nades were found.'
         })
         return
     }
@@ -78,7 +82,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
     const handleShowNades = async (): Promise<void> => {
         // Create embed with all the nades and show them to the user.
         const showFoundedNadesEmbed = embedWithNadesComponent({
-            title: 'Granadas encontradas',
+            title: isSpanish ? 'Granadas encontradas' : 'Founded nades',
             author: 'Mylo',
             nades: nadesToShow
         })
@@ -129,7 +133,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                             components: [],
                             embeds: [
                                 embedWithNadesComponent({
-                                    title: 'Granadas confirmadas',
+                                    title: isSpanish ? 'Granadas confirmadas' : 'Confirmed nades',
                                     nades: currentNades,
                                     author: 'Mylo'
                                 })
@@ -154,7 +158,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                     await i.editReply({
                         embeds: [
                             embedWithNadesComponent({
-                                title: 'Granadas encontradas',
+                                title: isSpanish ? 'Granadas encontradas' : 'Founded nades',
                                 author: 'Mylo',
                                 nades: currentNades
                             })
@@ -177,9 +181,9 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
 
         await handlePagination()
 
-        const { row } = selectNadeMenuComponent(nadesToShow)
+        const { row } = selectNadeMenuComponent(nadesToShow, locale)
         const userResponseSelectMenu = await i.followUp({
-            content: SELECT_MENU_CONTENT,
+            content: isSpanish ? '¿Qué granada quieres ver?' : 'What nade do you want to see?',
             components: [row]
         })
         try {
@@ -199,7 +203,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                 await userResponseSelectMenu.delete()
 
                 const nadeData = await i.editReply({
-                    embeds: [loadingEmbedComponent('Cargando granada...')]
+                    embeds: [loadingEmbedComponent(isSpanish ? 'Cargando granada...' : 'Loading nade...')]
                 })
 
                 // Answer the user with the previous made embed and the nade video.
@@ -207,7 +211,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                 await nadeData.edit({ embeds: [embedResponse] })
 
                 const continueButton = await i.followUp({
-                    content: `¿Quieres volver a ver las granadas?`,
+                    content: isSpanish ? '¿Quieres volver a ver las granadas?' : 'Do you want to see the nades again?',
                     components: [confirmButtonRow]
                 })
 

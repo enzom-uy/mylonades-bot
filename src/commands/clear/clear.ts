@@ -2,6 +2,7 @@ import {
     ChatInputCommandInteraction,
     Collection,
     DiscordAPIError,
+    LocaleString,
     Message,
     PartialMessage,
     SlashCommandBuilder,
@@ -14,16 +15,21 @@ const messageTooOldErrorCode = 50034
 
 export const data = new SlashCommandBuilder()
     .setName('clear')
-    .setDescription('Borra x cantidad de mensajes.')
+    .setDescription('Deletes x number of messages.')
+    .setDescriptionLocalizations({
+        'es-ES': 'Borra x cantidad de mensajes'
+    })
     .addStringOption(o =>
-        o.setName('cantidad').setDescription('Cantidad de mensajes a borrar.').setRequired(true)
+        o.setName('quantity').setNameLocalizations({'es-ES': 'cantidad'}).setDescription('Number of messages to delete.').setDescriptionLocalizations({'es-ES': 'Número de mensajes a borrar.'}).setRequired(true)
     )
 
 export const execute = async (
     i: ChatInputCommandInteraction
 ): Promise<Collection<string, PartialMessage | Message<boolean> | undefined> | undefined> => {
     await i.deferReply()
-    const messagesToDelete = i.options.getString('cantidad')
+    const locale: LocaleString = i.locale
+    const isSpanish = locale === 'es-ES'
+    const messagesToDelete = i.options.getString('quantity')
     const channel = i.channel
     if (channel instanceof TextChannel) {
         try {
@@ -33,7 +39,7 @@ export const execute = async (
         } catch (e) {
             const error = e as DiscordAPIError
             if (error.code === messageTooOldErrorCode) {
-                await i.editReply('Solo se pueden eliminar mensajes de los últimos 14 días.')
+                await i.editReply(isSpanish ? 'Solo se pueden eliminar mensajes de los últimos 14 días.' : 'Only messages from the last 14 days can be deleted.')
                 return
             }
             log('ERROR', error)

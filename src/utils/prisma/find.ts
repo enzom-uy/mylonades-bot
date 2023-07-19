@@ -1,4 +1,4 @@
-import { Nade, User } from '@prisma/client'
+import { Nade } from '@prisma/client'
 
 import { prisma } from '../../config/database'
 import { log } from '../log'
@@ -47,28 +47,34 @@ export const getLastFiveNades = async ({
 
 export const getNades = async ({
     query,
-    map,
-    nadeType,
     serverId
 }: {
     query?: string | null
-    map?: string | null
-    nadeType?: string | null
     serverId: string
 }): Promise<{ nades: NadeWithAuthorAndMap[] }> => {
     const nades = await prisma.nade.findMany({
         where: {
             server_id: serverId,
-            OR: [
+            OR: query ? [
                 {
                     title: query ? { contains: query } : undefined
                 },
                 {
                     description: query ? { contains: query } : null
+                },
+                {
+                    author: {
+                        name: query ? { contains: query } : undefined
+                    }
+                },
+                {
+                    map_name: query ? { contains: query } : undefined
+                },
+                {
+                    nade_type_name: query ? { contains: query } : undefined
                 }
-            ],
-            map: map ? { name: map } : undefined,
-            nade_type_name: nadeType ? nadeType : undefined
+            ] : undefined,
+            status: 'APPROVED'
         },
         include: {
             author: {
@@ -85,17 +91,4 @@ export const getNades = async ({
     })
 
     return { nades }
-}
-
-// Users
-export const getUsersRanking = async (): Promise<{ topUsers: User[] }> => {
-    const topUsers = await prisma.user.findMany({
-        orderBy: {
-            nades: {
-                _count: 'desc'
-            }
-        }
-    })
-
-    return { topUsers }
 }

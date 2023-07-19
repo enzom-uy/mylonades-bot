@@ -2,6 +2,7 @@ import { Nade } from '@prisma/client'
 import {
     ActionRow,
     ActionRowBuilder,
+    LocaleString,
     MessageActionRowComponent,
     StringSelectMenuBuilder,
     StringSelectMenuOptionBuilder
@@ -9,14 +10,14 @@ import {
 
 import { NadeWithAuthorAndMap } from '../utils/prisma/find'
 
-export const SELECT_MENU_CONTENT = '¿Qué granada quieres ver?'
 
 export const selectNadeMenuComponent = (
-    nades: NadeWithAuthorAndMap[] | Nade[]
+    nades: NadeWithAuthorAndMap[] | Nade[],
+    locale: LocaleString
 ): { row: ActionRow<MessageActionRowComponent> } => {
     const selectMenu = new StringSelectMenuBuilder()
         .setCustomId('select')
-        .setPlaceholder(SELECT_MENU_CONTENT)
+        .setPlaceholder(locale === 'es-ES' ? '¿Qué granada quieres ver?' : 'What nade do you want to see?')
         .addOptions(
             nades.map(nade =>
                 new StringSelectMenuOptionBuilder().setLabel(nade.title).setValue(nade.title)
