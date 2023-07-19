@@ -43,7 +43,8 @@ data.addStringOption(option =>
             'Text related to the nade. Can be part of the title, description, map, nade type or author.'
         )
         .setDescriptionLocalizations({
-            'es-ES': 'Texto relacionado a la granada. Puede ser parte del título, descripción, mapa, tipo o autor.'
+            'es-ES':
+                'Texto relacionado a la granada. Puede ser parte del título, descripción, mapa, tipo o autor.'
         })
 )
 
@@ -203,7 +204,9 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                 await userResponseSelectMenu.delete()
 
                 const nadeData = await i.editReply({
-                    embeds: [loadingEmbedComponent(isSpanish ? 'Cargando granada...' : 'Loading nade...')]
+                    embeds: [
+                        loadingEmbedComponent(isSpanish ? 'Cargando granada...' : 'Loading nade...')
+                    ]
                 })
 
                 // Answer the user with the previous made embed and the nade video.
@@ -211,7 +214,9 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
                 await nadeData.edit({ embeds: [embedResponse] })
 
                 const continueButton = await i.followUp({
-                    content: isSpanish ? '¿Quieres volver a ver las granadas?' : 'Do you want to see the nades again?',
+                    content: isSpanish
+                        ? '¿Quieres volver a ver las granadas?'
+                        : 'Do you want to see the nades again?',
                     components: [confirmButtonRow]
                 })
 

@@ -20,7 +20,12 @@ export const data = new SlashCommandBuilder()
         'es-ES': 'Borra x cantidad de mensajes'
     })
     .addStringOption(o =>
-        o.setName('quantity').setNameLocalizations({'es-ES': 'cantidad'}).setDescription('Number of messages to delete.').setDescriptionLocalizations({'es-ES': 'Número de mensajes a borrar.'}).setRequired(true)
+        o
+            .setName('quantity')
+            .setNameLocalizations({ 'es-ES': 'cantidad' })
+            .setDescription('Number of messages to delete.')
+            .setDescriptionLocalizations({ 'es-ES': 'Número de mensajes a borrar.' })
+            .setRequired(true)
     )
 
 export const execute = async (
@@ -39,7 +44,11 @@ export const execute = async (
         } catch (e) {
             const error = e as DiscordAPIError
             if (error.code === messageTooOldErrorCode) {
-                await i.editReply(isSpanish ? 'Solo se pueden eliminar mensajes de los últimos 14 días.' : 'Only messages from the last 14 days can be deleted.')
+                await i.editReply(
+                    isSpanish
+                        ? 'Solo se pueden eliminar mensajes de los últimos 14 días.'
+                        : 'Only messages from the last 14 days can be deleted.'
+                )
                 return
             }
             log('ERROR', error)
