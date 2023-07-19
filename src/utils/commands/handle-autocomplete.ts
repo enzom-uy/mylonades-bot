@@ -9,12 +9,12 @@ export const handleMapAndNadeTypeAutocomplete = async (
     const focusedOption = i.options.getFocused(true)
     let choices
 
-    if (focusedOption.name === 'mapa') {
+    if (focusedOption.name === 'map') {
         const mapsFromCache = myCache.get('maps') as MapsFromCache[]
         choices = mapsFromCache.map(map => map.name)
     }
 
-    if (focusedOption.name === 'tipo') {
+    if (focusedOption.name === 'type') {
         const nadeTypesFromCache = myCache.get('nadeTypes') as NadeTypesFromCache[]
         choices = nadeTypesFromCache.map(type => type.name)
     }
