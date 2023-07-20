@@ -1,5 +1,12 @@
 import { ChatInputCommandInteraction } from 'discord.js'
 
+export type CommandData = {
+    name: string
+    spanishName: string
+    description: string
+    spanishDescription: string
+}
+
 export type Data = {
     options: []
     name: string

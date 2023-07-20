@@ -9,15 +9,23 @@ import {
     TextChannel
 } from 'discord.js'
 
+import { CommandData } from '../../types/commands'
 import { log } from '../../utils/log'
 
 const messageTooOldErrorCode = 50034
 
+export const clearCommandData: CommandData = {
+    name: 'clear',
+    spanishName: 'clear',
+    description: 'Deletes x number of messages.',
+    spanishDescription: 'Borra x cantidad de mensajes.'
+}
+
 export const data = new SlashCommandBuilder()
-    .setName('clear')
-    .setDescription('Deletes x number of messages.')
+    .setName(clearCommandData.name)
+    .setDescription(clearCommandData.description)
     .setDescriptionLocalizations({
-        'es-ES': 'Borra x cantidad de mensajes'
+        'es-ES': clearCommandData.spanishDescription
     })
     .addStringOption(o =>
         o

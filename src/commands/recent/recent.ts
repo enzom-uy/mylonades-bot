@@ -7,16 +7,24 @@ import {
 
 import { loadingEmbedComponent } from '../../components/loading-embed'
 import { selectNadeMenuComponent } from '../../components/select-nade-menu'
+import { CommandData } from '../../types/commands'
 import { DiscordComponentConfirmationResponse, Filter } from '../../types/commands/recientes'
 import { embedColor } from '../../utils/bot/embeds'
 import { log } from '../../utils/log'
 import { getLastFiveNades } from '../../utils/prisma/find'
 
+export const recentCommandData: CommandData = {
+    name: 'recent',
+    spanishName: 'recientes',
+    description: 'Show the last 5 nades created.',
+    spanishDescription: 'Muestra las últimas 5 granadas creadas.'
+}
+
 export const data = new SlashCommandBuilder()
-    .setName('recent')
-    .setNameLocalizations({ 'es-ES': 'recientes' })
-    .setDescription('Show the last 5 nades created.')
-    .setDescriptionLocalizations({ 'es-ES': 'Muestra las últimas 5 granadas que se crearon.' })
+    .setName(recentCommandData.name)
+    .setNameLocalizations({ 'es-ES': recentCommandData.spanishName })
+    .setDescription(recentCommandData.description)
+    .setDescriptionLocalizations({ 'es-ES': recentCommandData.spanishDescription })
 
 export const execute = async (i: ChatInputCommandInteraction): Promise<void> => {
     await i.deferReply()

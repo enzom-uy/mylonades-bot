@@ -4,15 +4,23 @@ import { ActionRow, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputComma
 import { sevenMinInMs } from '../..';
 import { buttonWithCustomIdValidation } from '../../components/pagination-arrows';
 import { prisma } from '../../config/database';
+import { CommandData } from '../../types/commands';
 import { DiscordComponentConfirmationResponse, Filter } from '../../types/commands/recientes';
 import { embedColor } from '../../utils/bot/embeds';
 import { WEBSITE_URL } from '../../utils/constants';
 
+export const connectCommandData: CommandData = {
+    name: 'connect',
+    spanishName: 'conectar',
+    description: 'Connects your server with the Database.',
+    spanishDescription: 'Conecta tu servidor a la Base de Datos.'
+}
+
 export const data = new SlashCommandBuilder()
-    .setName('connect')
-    .setNameLocalizations({ 'es-ES': 'conectar' })
-    .setDescription('Connects your server with the Database.')
-    .setDescriptionLocalizations({ 'es-ES': 'Conecta tu servidor a la Base de Datos.' })
+    .setName(connectCommandData.name)
+    .setNameLocalizations({ 'es-ES': connectCommandData.spanishName })
+    .setDescription(connectCommandData.description)
+    .setDescriptionLocalizations({ 'es-ES': connectCommandData.spanishDescription })
 
 export const execute = async (i: ChatInputCommandInteraction): Promise<void> => {
     await i.deferReply({ephemeral: true})

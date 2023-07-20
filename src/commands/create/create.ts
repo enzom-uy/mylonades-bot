@@ -10,6 +10,7 @@ import { embedResponseNadeComponent } from '../../components/embed-response-nade
 import { loadingEmbedComponent } from '../../components/loading-embed'
 import { prisma } from '../../config/database'
 import { validateInputs } from '../../schemas/commands/crear'
+import { CommandData } from '../../types/commands'
 import { StringOptions } from '../../types/commands/crear'
 import { handleMapAndNadeTypeAutocomplete } from '../../utils/commands/handle-autocomplete'
 import { compareRequired } from '../../utils/commands/sort-required-first'
@@ -36,12 +37,19 @@ const stringOptions: StringOptions[] = [
     }
 ]
 
+export const createCommandData: CommandData = {
+    name: 'create',
+    spanishName: 'crear',
+    description: 'Creates a new nade.',
+    spanishDescription: 'Crea una nueva granada.'
+}
+
 const optionsRequiredFirst = stringOptions.sort(compareRequired)
 export const data = new SlashCommandBuilder()
-    .setName('create')
-    .setNameLocalizations({ 'es-ES': 'crear' })
-    .setDescription('Creates a new nade.')
-    .setDescriptionLocalizations({ 'es-ES': 'Crea una nueva granada.' })
+    .setName(createCommandData.name)
+    .setNameLocalizations({ 'es-ES': createCommandData.spanishName })
+    .setDescription(createCommandData.description)
+    .setDescriptionLocalizations({ 'es-ES': createCommandData.spanishDescription })
 data.addAttachmentOption(o =>
     o
         .setName('video')

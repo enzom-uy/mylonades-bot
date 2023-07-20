@@ -20,20 +20,28 @@ import {
 } from '../../components/pagination-arrows'
 import { selectNadeMenuComponent } from '../../components/select-nade-menu'
 import { InteractionFailedError } from '../../errors/errors'
+import { CommandData } from '../../types/commands'
 import { DiscordComponentConfirmationResponse, Filter } from '../../types/commands/recientes'
 import { handleMapAndNadeTypeAutocomplete } from '../../utils/commands/handle-autocomplete'
 import { log } from '../../utils/log'
 import { getPaginatedData } from '../../utils/paginate'
 import { getNades } from '../../utils/prisma/find'
 
+export const searchCommandData: CommandData = {
+    name: 'search',
+    spanishName: 'buscar',
+    description: 'Search for a nade based on your query.',
+    spanishDescription: 'Busca granadas según tu query.'
+}
+
 export const data = new SlashCommandBuilder()
-    .setName('search')
+    .setName(searchCommandData.name)
     .setNameLocalizations({
-        'es-ES': 'buscar'
+        'es-ES': searchCommandData.spanishName
     })
-    .setDescription('Search for a nade based on your query.')
+    .setDescription(searchCommandData.description)
     .setDescriptionLocalizations({
-        'es-ES': 'Buscar granadas según tu query.'
+        'es-ES': searchCommandData.spanishDescription
     })
 
 data.addStringOption(option =>
