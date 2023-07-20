@@ -13,7 +13,7 @@ import { log } from '../../utils/log'
 import { getLastFiveNades } from '../../utils/prisma/find'
 
 export const data = new SlashCommandBuilder()
-    .setName('recents')
+    .setName('recent')
     .setNameLocalizations({ 'es-ES': 'recientes' })
     .setDescription('Show the last 5 nades created.')
     .setDescriptionLocalizations({ 'es-ES': 'Muestra las últimas 5 granadas que se crearon.' })

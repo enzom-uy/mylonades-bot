@@ -5,7 +5,7 @@ import { BOT_TOKEN } from './config/envs'
 import './deploy-commands'
 import { log } from './utils/log'
 
-const sevenMinInMs = 420000
+export const sevenMinInMs = 420000
 
 client.login(BOT_TOKEN)
 

@@ -8,12 +8,14 @@ export const buttonWithCustomIdValidation = <T extends string>({
     emoji,
     style,
     disabled,
+    label
 }: {
     button: ButtonBuilder
     customId: T
     emoji?: ComponentEmojiResolvable
     style: ButtonStyle
     disabled?: boolean
+    label?: string
 }): ButtonBuilder => {
     button
         .setCustomId(customId)
@@ -22,6 +24,7 @@ export const buttonWithCustomIdValidation = <T extends string>({
     if (emoji) {
         button.setEmoji(emoji)
     }
+    if (label) button.setLabel(label)
     return button
 }
 
