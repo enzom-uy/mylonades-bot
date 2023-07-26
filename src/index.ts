@@ -1,4 +1,4 @@
-import { Events, TextChannel } from 'discord.js'
+import { ChannelType, Events, GuildMember, LocaleString, TextChannel } from 'discord.js'
 
 import { client } from './config/client'
 import { BOT_TOKEN } from './config/envs'
@@ -11,6 +11,20 @@ client.login(BOT_TOKEN)
 
 client.once(Events.ClientReady, async c => {
     log('SUCCESS', `Ready! Logged in as ${c.user.tag}.`)
+})
+
+client.on('guildCreate', g => {
+    const locale = g.preferredLocale as LocaleString
+    const channel = g.channels.cache.find(
+        channel =>
+            channel.type === ChannelType.GuildText &&
+            channel.permissionsFor(g.members.me as GuildMember).has('SendMessages')
+    ) as TextChannel
+    channel.send(
+        locale === 'es-ES'
+            ? 'Comienza a usar el bot aprendiendo todos los comandos. Usa el comando "/ayuda" para verlos.'
+            : 'Start using the bot by learning all the commands. Use the "/help" command to see all of them.'
+    )
 })
 
 client.on('messageCreate', async message => {
