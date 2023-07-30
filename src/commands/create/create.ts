@@ -65,39 +65,39 @@ data.addStringOption(o =>
         .setNameLocalizations({
             'es-ES': 'mapa'
         })
-            .setDescription('Map name.')
-            .setDescriptionLocalizations({ 'es-ES': 'Nombre del mapa.' })
-            .setAutocomplete(true)
-            .setRequired(true)
+        .setDescription('Map name.')
+        .setDescriptionLocalizations({ 'es-ES': 'Nombre del mapa.' })
+        .setAutocomplete(true)
+        .setRequired(true)
+)
+data.addStringOption(o =>
+    o
+        .setName('type')
+        .setNameLocalizations({ 'es-ES': 'tipo' })
+        .setDescription('Nade type.')
+        .setDescriptionLocalizations({ 'es-ES': 'Tipo de la granada.' })
+        .setAutocomplete(true)
+        .setRequired(true)
+)
+optionsRequiredFirst.forEach(option => {
+    data.addStringOption(opt =>
+        opt
+            .setName(option.title)
+            .setNameLocalizations({ 'es-ES': option['spanish-title'] })
+            .setDescription(option.description)
+            .setDescriptionLocalizations({ 'es-ES': option['spanish-description'] })
+            .setRequired(option.required)
+            .setAutocomplete(option.autocomplete ? true : false)
     )
-    data.addStringOption(o =>
-        o
-            .setName('type')
-            .setNameLocalizations({ 'es-ES': 'tipo' })
-            .setDescription('Nade type.')
-            .setDescriptionLocalizations({ 'es-ES': 'Tipo de la granada.' })
-            .setAutocomplete(true)
-            .setRequired(true)
-    )
-    optionsRequiredFirst.forEach(option => {
-        data.addStringOption(opt =>
-            opt
-                .setName(option.title)
-                .setNameLocalizations({ 'es-ES': option['spanish-title'] })
-                .setDescription(option.description)
-                .setDescriptionLocalizations({ 'es-ES': option['spanish-description'] })
-                .setRequired(option.required)
-                .setAutocomplete(option.autocomplete ? true : false)
-        )
-    })
+})
 
-    export const autocomplete = async (i: AutocompleteInteraction): Promise<void> => {
-        await handleMapAndNadeTypeAutocomplete(i)
-    }
+export const autocomplete = async (i: AutocompleteInteraction): Promise<void> => {
+    await handleMapAndNadeTypeAutocomplete(i)
+}
 
-    export const execute = async (
-        i: ChatInputCommandInteraction
-    ): Promise<Message<boolean> | undefined> => {
+export const execute = async (
+    i: ChatInputCommandInteraction
+): Promise<Message<boolean> | undefined> => {
     await i.deferReply()
     const locale: LocaleString = i.locale
     const isSpanish = locale === 'es-ES'
@@ -172,8 +172,8 @@ data.addStringOption(o =>
     if (newNade) {
         const successMessage = await i.editReply({
             content: isSpanish
-                ? `Se ha subido una nueva nade a tu servidor:`
-                : `A new nade was uploaded to your server:`,
+                ? `Se ha subido una nueva nade a tu servidor. Si eres administrador, recuerda aprobarla en: ${WEBSITE_URL}/${i.guildId}/admin:`
+                : `A new nade was uploaded to your server. If you're an admin, remember to approve it: ${WEBSITE_URL}/${i.guildId}/admin`,
             embeds: [loadingEmbedComponent(isSpanish ? 'Cargando granada...' : 'Loading nade...')]
         })
         await i.followUp({
