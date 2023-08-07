@@ -41,8 +41,7 @@ export const execute = async (i: ChatInputCommandInteraction): Promise<void> => 
     const guildOwnerId = i.guild?.ownerId
     const userIsOwner = userId === guildOwnerId
     if (!userIsOwner) {
-        await i.reply({
-            ephemeral: true,
+        await i.editReply({
             content: isSpanish
                 ? 'Tienes que ser dueño del servidor.'
                 : 'You have to own the server.'
